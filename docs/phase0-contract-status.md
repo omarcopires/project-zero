@@ -20,7 +20,7 @@ Data: 2026-09-17. Estado: **em andamento; aceite não concluído**. Nenhuma impl
 
 Os sete fontes do servidor são `src/core.hpp`, `src/server/network/protocol/protocol_profile.cpp`, `src/server/network/protocol/protocolgame.cpp`, `src/server/network/http/routes.cpp`, `src/server/network/http/webservice/webservice.cpp`, `src/server/network/http/webservice/handlers/login_handler.cpp` e `src/io/iologindata.cpp`. Estado limpo desses caminhos não certifica toda a árvore nem o binário utilizado pelo responsável.
 
-Não foram consultados remotes, configurações ativas, chaves, bancos, logs reais, dumps ou artefatos de build. Não houve conexões de rede, execução de código de projeto, configuração, build, instalação ou testes. Linhas indicadas são localizadores da revisão inspecionada, não contratos estáveis de localização.
+Não foram consultados remotes, configurações ativas, chaves, bancos, logs reais, dumps ou artefatos de build. Houve consultas públicas à documentação Qt e aos metadados vcpkg; não houve conexão aos serviços do jogo, execução de código de projeto, configuração, build, instalação ou testes. Linhas indicadas são localizadores da revisão inspecionada, não contratos estáveis de localização.
 
 ## Contrato estático do servidor 15.25
 
@@ -121,12 +121,80 @@ O responsável confirmou que mantém esse cliente ao longo dos anos. A revisão 
 - Fixar C++, MSVC, CMake, triplet e vinculação/runtime coerentes com Qt e dependências. Preservar `.clang-format`. Definir versão de spdlog por baseline e reproduzir o [contrato de logging](coding-standards.md#contrato-obrigatório-do-backend-novo).
 - A consulta de disponibilidade no PATH não encontrou `cmake`, `cl`, `vcpkg`, `qmake` ou `qtpaths` na sessão inspecionada. Isso **não comprova ausência de instalações** fora desse ambiente. Nenhuma ferramenta foi executada para obter versão.
 
+### Recomendação de toolchain — proposta para aprovação
+
+Consulta estática de 2026-09-17. Esta seção recomenda uma combinação para avaliação; **não declara dependências instaladas, resolução executada ou compatibilidade comprovada**. Nenhum manifesto, preset ou código foi criado. A consulta pública de metadados não envolveu conexão ao servidor do jogo.
+
+| Decisão | Recomendação | Fundamentação / limite |
+|---|---|---|
+| Padrão C++ | C++20 por alvo, sem extensões do compilador | Suficiente como base inicial; também atende ao requisito de linguagem publicado para WebEngine. Não herdar C++23 do servidor nem usar modo `latest` |
+| Origem Qt | Exclusivamente vcpkg | Decisão já confirmada pelo responsável |
+| Revisão vcpkg candidata | `fa8cecf91d7f31a1715a7a6524f208897ffb33ce` | Manifests, baseline e triplet consultados nessa revisão imutável; não usar `master` móvel no projeto |
+| Qt candidato | 6.11.1 | Versões dos ports e do baseline conferidas; adequação aos recursos privados do frontend ainda não demonstrada |
+| Plataforma/triplet | Windows x64, `x64-windows` | Triplet declara bibliotecas e CRT dinâmicos; WebEngine dessa revisão exige Windows x64 e `!static` |
+| Compilador | Família MSVC 2022/v143 | Matriz Qt 6.11 consultada lista MSVC 2022; patch exato do toolset depende do inventário local. Não herdar v145 por suposição |
+| Gerador | Ninja, configurações Debug/Release separadas | Coerente com a proposta da Fase 1; versões exatas de CMake/Ninja ainda precisam ser registradas |
+| Transporte | Qt Network no adaptador; `QCoreApplication` na composição | Evita uma segunda biblioteca de I/O; domínio/casos de uso permanecem sem Qt, sockets ou spdlog |
+| Testes | GoogleTest no núcleo; Qt Test na integração de adaptadores | Execução exclusivamente pelo responsável/CI; Qt Quick Test somente na integração visual posterior |
+| Renderização | Adiar seleção do backend gráfico até mapear `RenderDriver` e tipos nativos | Não inferir OpenGL, D3D ou compatibilidade a partir dos imports |
+
+#### Ports, features e separação por fase
+
+Versões abaixo incluem a revisão do port com sufixo `#N` quando diferente de zero. Para os ports declarados diretamente, a proposta é desabilitar features padrão e habilitar explicitamente as listadas. Isso **não elimina dependências/features transitivas**; o grafo final precisa ser conferido pelo responsável/CI na futura resolução.
+
+| Fase / finalidade | Port e versão no baseline | Features explícitas propostas |
+|---|---|---|
+| Diagnóstico sem interface e transporte | `qtbase` 6.11.1#2 | `network`, `thread`, `openssl`; `testlib` para testes dos adaptadores |
+| Logging de infraestrutura | `spdlog` 1.17.0#1 | `fmt`, `tz-offset`; sem benchmark. Manter o [contrato de logging](coding-standards.md#contrato-obrigatório-do-backend-novo) |
+| Testes puros | `gtest` 1.18.0 | Nenhuma feature adicional |
+| Integração visual posterior | `qtbase` 6.11.1#2 | Acrescentar `gui`, `opengl`, `png`, `jpeg`, `freetype`, `harfbuzz`; `windeployqt` no empacotamento. Suporte OpenGL não decide o backend do renderizador |
+| QML, Quick, Controls e módulos relacionados | `qtdeclarative` 6.11.1 | Nenhuma feature própria nesse manifest; inclui dependências como `qtshadertools`, `qtsvg` e `qtlanguageserver` |
+| Efeitos legados do frontend | `qt5compat` 6.11.1 | `qml`, para os imports de GraphicalEffects; não fornece o módulo local `QtQuick.LegacyControls` |
+| Integração web quando o recorte carregado exigir | `qtwebengine` 6.11.1#2 | `webengine`, `webchannel`; `webengine` também exige `pdf` transitivamente nesse port |
+| Tipos QML de WebChannel | `qtwebchannel` 6.11.1 | `qml`; também solicitado transitivamente por `qtwebengine[webchannel]` |
+
+O bootstrap da Fase 1 é **sem QML e sem janela**. Não precisa de Quick, Controls, GraphicalEffects ou WebEngine para carregar uma UI, pois não carrega UI alguma. Isso não garante que o grafo transitivo de dependências seja mínimo. A futura integração gráfica constitui outro recorte e não pode dispensar imports necessários apenas porque uma tela está invisível.
+
+HTTPS deve validar certificado e identidade do servidor; selecionar `openssl` não comprova instalação do backend TLS nem configuração de confiança. Não desabilitar validações para obter funcionamento aparente.
+
+#### Evidências do frontend e risco de versão
+
+Exemplos de arquivos efetivamente inspecionados, relativos à raiz; não são inventário completo de propriedades ou prova de carregamento:
+
+| Consumidor | Import / consequência |
+|---|---|
+| `qt/qml/qmlcomponents/qml/clientwindow.qml` | `QtQuick`, `QtQml`, `QtQuick.Window`, `Qt5Compat.GraphicalEffects`; raiz `Window`, portanto gráfica |
+| `qt/qml/qmlcomponents/qml/TibiaButton.qml` e `TibiaCheckBox.qml` | `QtQuick.Templates` e `QtQuick.Controls.Basic` |
+| `qt/qml/qmlcomponents/qml/ConfiguredBossSlot.qml` | `QtQuick.Effects` |
+| `qt/qml/qmlcomponents/qml/createaccountandcharacter/CreateAccountDialog.qml` | Imports reais de `QtWebEngine` e `QtWebChannel`, além de `QtQuick.LegacyControls` |
+| `qt/qml/qmlcomponents/qml/textureatlasviewer.qml` | `QtCore` |
+| `qt-project.org/imports/QtQuick/Dialogs/quickimpl/qml/FileDialog.qml` | `QtQuick.Dialogs.quickimpl`, `QtQuick.Controls.Basic.impl`, `Qt.labs.folderlistmodel` |
+| `qt-project.org/imports/QtQuick/Controls/Basic/TableViewDelegate.qml` e `SelectionRectangle.qml` | `Qt.labs.qmlmodels` e `QtQuick.Shapes` |
+| `qt-project.org/imports/QtQuick/Controls/Windows/CheckBox.qml` | `QtQuick.NativeStyle` |
+| `qt-project.org/imports/Qt5Compat/GraphicalEffects/Blend.qml` | `Qt5Compat.GraphicalEffects.private` |
+| `data/BlurItem.qml` e `message.txt` | QtQuick; o segundo também importa Layouts e `qmlcomponents`. Extensão `.txt` não prova ausência de QML nem uso em runtime |
+
+Os recursos embutidos também importam `QtQuick.Controls.impl` e implementações específicas de estilos, inclusive FluentWinUI3. **APIs privadas e plugins podem variar entre versões Qt**; os arquivos preservados não identificam sozinhos um SDK compatível. Imports opcionais de estilos nos `qmldir` não tornam todos esses estilos dependências diretas do recorte Windows.
+
+`qmlcomponents`, `qmlcomponents.qml`, `qmlenumvalues` e `QtQuick.LegacyControls` são contratos locais a atender no motor/adaptadores novos. Nomes de plugins e instruções `prefer` dos descritores devem ser respeitados externamente, não apagados ou substituídos nos originais. Imports por URL `qrc:` e arquivos JavaScript locais não são ports vcpkg independentes. `import QtQuick.Layouts 1.2` em `TibiaDialog.qml` não identifica a versão do SDK nem comprova erro isoladamente.
+
+Se a avaliação externa demonstrar incompatibilidade de Qt 6.11.1 com esses contratos, reavaliar a versão candidata ou a adaptação permitida; **não atualizar, remendar ou substituir os recursos protegidos para encaixar no SDK**. A escolha mais recente disponível não é automaticamente a escolha compatível.
+
+#### Pendências específicas da proposta
+
+- Aprovação da combinação candidata; revisão exata de MSVC, Windows SDK, CMake e Ninja ainda não fixada. A presença de `vswhere.exe` foi observada, mas o inventário de instalações não foi executado; nenhuma ferramenta foi instalada ou iniciada para obter versões.
+- A documentação WebEngine consultada exige compilador C++20 e, no Windows, SDK pelo menos `10.0.26100.0`; lista MSVC 14.36 como mínimo para VS 2022. São mínimos publicados, não prova de suficiência para esse port ou identificação do ambiente local.
+- Fixar as ferramentas host requeridas pelo port e os caminhos de execução externamente; Qt pelo vcpkg pode compilar dependências. Nenhuma instalação fica autorizada ao agente por esta proposta.
+- Validar externamente resolução, ABI, plugins, TLS e empacotamento. Integração QML e fidelidade visual permanecem validações posteriores, sem aceite presumido.
+
+Fontes públicas consultadas: [baseline fixo](https://github.com/microsoft/vcpkg/blob/fa8cecf91d7f31a1715a7a6524f208897ffb33ce/versions/baseline.json), [ports nessa revisão](https://github.com/microsoft/vcpkg/tree/fa8cecf91d7f31a1715a7a6524f208897ffb33ce/ports), [triplet](https://github.com/microsoft/vcpkg/blob/fa8cecf91d7f31a1715a7a6524f208897ffb33ce/triplets/x64-windows.cmake), [Qt para Windows](https://doc.qt.io/qt-6/windows.html) e [requisitos WebEngine](https://doc.qt.io/qt-6/qtwebengine-platform-notes.html). As páginas Qt são móveis; os requisitos relatados correspondem à consulta desta rodada.
+
 ## Pendências para o aceite
 
 1. Responsável: vincular a confirmação já fornecida de compilação, seleção, login e jogo às builds/revisões exatas utilizadas. Não anexar logs reais, senhas, tokens ou dumps; não é necessário repetir o resultado geral já relatado.
 2. Responsável: confirmar modo de autenticação e endpoints de laboratório sem dados sensíveis; documentar as condições da confirmação manual.
-3. Toolchain: selecionar versões, baseline, módulos/features e triplet para Qt pelo vcpkg, após avaliar compatibilidade dos contratos legados. A proposta de versões permanece pendente.
+3. Toolchain: aprovar ou ajustar a proposta acima e registrar versões exatas das ferramentas locais; avaliar compatibilidade dos contratos legados antes do aceite visual. Ports/features documentados não equivalem a resolução executada.
 4. Recursos: documentar origem, disponibilidade e correspondência de sprites, metadados, traduções e IDs.
 5. Contratos: completar inventário transitivo e matriz do MVP. Manter o caminho de chat afetado bloqueado sem solução compatível demonstrada.
 
-**Próxima etapa:** elaborar a proposta formal de toolchain (versões, baseline, triplet e features), sem aguardar outra referência externa. Sua seleção não autoriza agentes a configurar ou executar projetos. A [Fase 1](phase1-bootstrap-transport.md) continua não iniciada.
+**Próxima etapa:** decisão do responsável sobre a toolchain candidata e identificação das ferramentas disponíveis, sem aguardar outra referência externa. O inventário estático de contratos pode continuar em paralelo. A seleção não autoriza agentes a configurar ou executar projetos. A [Fase 1](phase1-bootstrap-transport.md) continua não iniciada.
