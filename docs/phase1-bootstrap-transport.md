@@ -11,10 +11,10 @@ Criar a base executável do novo motor em C++/Qt 6 com CMake + vcpkg e implement
 Esta fase só inicia após a Fase 0 entregar:
 
 - contrato 15.25 confirmado (perfil Current, capacidades e revisão do servidor);
-- fluxo de autenticação documentado (HTTP/sessão como candidato, sujeito à configuração efetiva);
+- fluxo HTTP/sessão/TCP documentado nos fontes e vinculado à configuração efetiva utilizada;
 - cliente de referência e revisão inspecionada registrados;
 - versões fixadas: Qt, C++, MSVC, CMake, vcpkg/baseline, triplet;
-- origem única de Qt: **ports vcpkg**, conforme decisão do responsável; módulos/features e ABI ainda precisam ser fixados;
+- origem única de Qt: **ports vcpkg**, com módulos/features selecionados na Fase 0; resolução e compatibilidade de ABI ainda precisam ser validadas externamente;
 - matriz de compatibilidade e inventário inicial de contratos do frontend.
 
 O [relatório parcial da Fase 0](phase0-contract-status.md) registra o avanço e os bloqueios; ainda não atende a todos os pré-requisitos acima.
@@ -76,12 +76,12 @@ Todo backend segue [Clean Architecture e Clean Code](coding-standards.md), com n
 
 - Estruturar `client/src/core/` com tipos de erro e eventos tipados.
 - Extrair regras determinísticas para funções puras testáveis.
-- Criar `client/tests/` com GoogleTest (proposta; confirmar na Fase 0) e registro no CTest.
+- Criar `client/tests/` com GoogleTest para o núcleo e Qt Test para adaptadores, conforme seleção da Fase 0, e registro no CTest.
 - Cada correção de regressão preserva teste do caminho defeituoso.
 
 ### 1.3 — Transporte
 
-- Implementar conexão TCP assíncrona (Qt Network ou ASIO — decidir na Fase 0 com base na integração Qt).
+- Implementar conexão TCP assíncrona com Qt Network, conforme seleção da Fase 0; não reabrir a escolha de biblioteca sem nova evidência.
 - Buffers de leitura incremental; sem bloquear a thread de UI (não há UI nesta fase, mas o contrato de threads já vale).
 - Timeouts de conexão/leitura; cancelamento cooperativo; fechamento limpo e notificação de desconexão.
 - Propriedade e ciclo de vida explícitos; sem referências pendentes após fechamento.
@@ -141,7 +141,7 @@ Ninja, Qt Network, GoogleTest e Qt Test foram selecionados na [Fase 0](phase0-co
 
 ### Caminho HTTP condicional
 
-O fluxo candidato HTTP → sessão → TCP não está confirmado. Se a Fase 0 exigir HTTP, a Fase 1 inclui somente a infraestrutura assíncrona necessária: limites de resposta, deadline, cancelamento, fechamento e classificação de erros. A composição de autenticação, credenciais e interpretação de sessão pertence à Fase 2. Não seguir redirects para endpoints não autorizados nem implementar fallback automático para login TCP. HTTP sem TLS fica restrito ao laboratório em loopback; exposição externa exige decisão de transporte seguro.
+O fluxo HTTP → sessão → TCP foi identificado nos fontes do cliente e do servidor; seleção, login e jogo foram relatados pelo responsável. Falta associar esse relato às revisões/builds e à configuração efetiva. Para esse caminho, a Fase 1 inclui somente a infraestrutura HTTP assíncrona necessária: limites de resposta, deadline, cancelamento, fechamento e classificação de erros. A composição de autenticação, credenciais e interpretação de sessão pertence à Fase 2. Não seguir redirects para endpoints não autorizados nem implementar fallback automático para login TCP. HTTP sem TLS fica restrito ao laboratório em loopback; exposição externa exige decisão de transporte seguro.
 
 ### Contrato operacional mínimo
 
