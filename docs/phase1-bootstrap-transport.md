@@ -14,8 +14,10 @@ Esta fase só inicia após a Fase 0 entregar:
 - fluxo de autenticação documentado (HTTP/sessão como candidato, sujeito à configuração efetiva);
 - fork/commit/licença do OTClient de referência registrados;
 - versões fixadas: Qt, C++, MSVC, CMake, vcpkg/baseline, triplet;
-- origem única de Qt decidida (SDK oficial ou ports vcpkg);
+- origem única de Qt: **ports vcpkg**, conforme decisão do responsável; módulos/features e ABI ainda precisam ser fixados;
 - matriz de compatibilidade e inventário inicial de contratos do frontend.
+
+O [relatório parcial da Fase 0](phase0-contract-status.md) registra o avanço e os bloqueios; ainda não atende a todos os pré-requisitos acima.
 
 ## Escopo
 

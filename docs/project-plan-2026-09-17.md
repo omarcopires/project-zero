@@ -60,10 +60,12 @@ A quantidade de imagens não demonstra a presença de sprites de mundo compatív
 
 ### Decisões ainda abertas
 
-1. Fork, URL, licença e revisão OTClient de referência. Nenhum foi selecionado ou validado.
-2. Configuração efetiva de autenticação e capacidades do servidor 15.25.
+Progresso da Fase 0, evidências e bloqueios: [relatório parcial](phase0-contract-status.md). O responsável escolheu Qt pelo vcpkg, confirmou o funcionamento do cliente local e optou por indicar outra referência licenciada; isso não encerra a fase.
+
+1. Fork, URL, licença e revisão OTClient de referência. A alternativa licenciada escolhida pelo responsável aguarda URL pública. `E:\caverot-client` permanece evidência funcional, não código aprovado para cópia ou adoção.
+2. Configuração efetiva de autenticação e capacidades do servidor 15.25. Compilação, seleção, login e jogo normais foram confirmados pelo responsável; falta vincular o relato às builds/revisões exatas utilizadas, não repetir o resultado geral.
 3. Versão C++, Qt, MSVC, CMake, vcpkg/baseline, triplet e backend gráfico.
-4. Origem única de Qt: SDK oficial ou ports vcpkg. Não misturar instalações/ABIs.
+4. Origem única de Qt decidida: **ports vcpkg**. Cobertura de módulos/features e compatibilidade de ABI permanecem pendentes; não misturar com SDK externo.
 5. Pacote autorizado de sprites, traduções, metadados e correspondência de IDs.
 6. Texto e alcance das autorizações e licença de distribuição do código novo.
 7. Equipe, disponibilidade, orçamento de desempenho e ambiente de referência.
