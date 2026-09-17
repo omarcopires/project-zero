@@ -1,0 +1,243 @@
+# Plano do novo cliente
+
+Data: 2026-09-17. Estado: plano-base aprovado; implementação não iniciada. Este documento consolida o planejamento da sessão e incorpora a exigência posterior de preservar integralmente o frontend original.
+
+## 1. Decisões confirmadas
+
+- Núcleo novo em **C++ e Qt 6**, inicialmente Windows.
+- Nomes descritivos por responsabilidade, sem marca ou prefixo fixo em pastas, arquivos, namespaces, manifesto, alvos e executáveis. Caminhos externos históricos permanecem referências, não nomes do projeto; não renomear a raiz.
+- **Clean Architecture e Clean Code** obrigatórios em todo backend. Domínio/casos de uso independentes de infraestrutura; adaptadores dependem das portas internas e são injetados na composição.
+- **Spdlog** como padrão de logging, encapsulado na infraestrutura, sem dependência concreta no domínio/casos de uso e sem logger global. Versão/baseline serão fixadas na implementação autorizada.
+- Cada enum novo é **enum class em header próprio**, nomeado pelo tipo e no módulo responsável. Adaptações Qt/QML isoladas, com exceções documentadas sem alterar originais.
+- **CMake + vcpkg**, modo manifesto, baseline e triplet fixados, presets versionados e configuração local sem segredos no Git.
+- Testes automatizados desde o início. Configuração, build, testes compilados e execução real são responsabilidade do responsável ou CI previamente configurada, nunca do agente.
+- **Suporte exclusivo a 15.25** do servidor de desenvolvimento em `E:\caverot-server`. Não seguir automaticamente versões futuras nem incluir compatibilidade antiga.
+- OTClient apenas como referência; não adotar seu núcleo ou sua arquitetura Lua/OTUI.
+- Conexão e sessão antes da integração visual completa.
+- MVP: login, seleção de personagem, mapa, movimento, chat, inventário e combate básico.
+- Intenção de publicação open source. O responsável declarou autorização para os recursos atuais; condições e abrangência de redistribuição ainda devem ser documentadas.
+- Nenhum prazo prometido antes de fechar referências, recursos, equipe e disponibilidade.
+
+### Regra central: frontend original imutável
+
+Preservar byte a byte `data/`, `images/`, `qt/`, `qt-project.org/`, `qtwebchannel/`, `spells/` e `message.txt`. Não editar, formatar, normalizar finais de linha, renomear, mover, excluir, converter, substituir ou gerar arquivos nessas árvores.
+
+O motor novo deve atender ao frontend existente, e não o contrário. Proibido contornar essa regra com cópias modificadas, patches de build, substituição em runtime ou componentes de mesmo nome que alterem o comportamento da apresentação. Não converter QML para OTUI.
+
+Implementar compatibilidade exclusivamente em C++/Qt novo, adaptadores, modelos, tipos nativos ausentes, providers e mapeamentos externos de recursos. Se um contrato não puder ser preservado, registrar o bloqueio e interromper a funcionalidade afetada; não modificar o QML.
+
+Essa regra substitui a sugestão inicial de construir uma apresentação alternativa ou adaptar componentes QML. Um hospedeiro ou harness auxiliar separado pode instanciar componentes originais sem alterá-los, mas não substituir a interface do jogo. Componentes invisíveis também podem exigir tipos resolvidos e dependências completas.
+
+## 2. Evidências e pendências
+
+### Servidor de desenvolvimento
+
+Resultados de inspeção somente leitura da fase de planejamento, não validação do executável:
+
+| Referência em `E:\caverot-server` | Evidência / consequência |
+|---|---|
+| `src/core.hpp` | Declara Canary 3.6.1 e `CLIENT_VERSION = 1525`; não comprova versão do binário em uso |
+| `src/server/network/protocol/protocol_profile.cpp` | Perfis e capacidades distintos; apenas Current/15.25 entra no escopo |
+| `src/server/network/protocol/protocolgame.cpp` | `supportsWeaponProficiencyDetailList` e `shouldSendWeaponProficiencyDetailList` distinguem capacidades dentro de 15.25 |
+| `config/session_auth.lua` | Declara autenticação por sessão; configuração efetiva e precedência pendentes |
+| `config/http.lua` | Habilita HTTP/8080 no fragmento inspecionado; não confirma serviço em execução |
+| `src/server/network/http/routes.cpp` e `webservice/handlers/login_handler.cpp` | Caminho de autenticação HTTP, sessão, mundos e personagens |
+| `src/io/iologindata.cpp` | `gameWorldAuthentication` valida sessão e associação personagem-conta |
+| `src/server/network/protocol/protocollogin.cpp` | Também existe login TCP; não presumir intercambialidade com HTTP |
+| `src/protobuf/appearances.proto`, `data/items/appearances.dat`, `data/items/items.xml` | Metadados/IDs, não pacote gráfico completo |
+| `CMakePresets.json`, `cmake/modules/BaseConfig.cmake` | Servidor usa toolchain Windows/MSVC/vcpkg e C++23; não herdar automaticamente padrão ou toolset do cliente |
+| `tests/README.md` e `tests/unit/server/network/protocol/multiprotocol_test.cpp` | Testes úteis como referência; não executados. Integração pode recriar banco |
+
+O fluxo candidato é **HTTP → sessão → conexão de jogo TCP**, sujeito à confirmação da configuração efetiva. Não enviar mensagens de login por suposição para descobrir o contrato. O serviço HTTP inspecionado usa `httplib::Server`, sem TLS nativo evidenciado nesse trecho; manter laboratório em loopback. Qualquer exposição futura exige transporte seguro planejado.
+
+Não foram abertos arquivos ativos potencialmente contendo credenciais, bancos, chaves ou logs. O número 15.25 não resolve sozinho capacidades, formato dos assets ou revisão de conteúdo.
+
+### Frontend e recursos
+
+A [auditoria](backend-resource-audit.md) encontrou recursos Qt, código QML/JS e descritores de integração; não encontrou o núcleo nativo implementado. Faltam tipos como `WorldMap`/`LightMap`, contratos de controllers, modelos ativos e providers.
+
+A quantidade de imagens não demonstra a presença de sprites de mundo compatíveis. Catálogos de traduções, aliases e associação entre IDs e aparências precisam ser verificados. O pacote local de recursos Qt não substitui uma distribuição válida do SDK/runtime.
+
+### Decisões ainda abertas
+
+1. Fork, URL, licença e revisão OTClient de referência. Nenhum foi selecionado ou validado.
+2. Configuração efetiva de autenticação e capacidades do servidor 15.25.
+3. Versão C++, Qt, MSVC, CMake, vcpkg/baseline, triplet e backend gráfico.
+4. Origem única de Qt: SDK oficial ou ports vcpkg. Não misturar instalações/ABIs.
+5. Pacote autorizado de sprites, traduções, metadados e correspondência de IDs.
+6. Texto e alcance das autorizações e licença de distribuição do código novo.
+7. Equipe, disponibilidade, orçamento de desempenho e ambiente de referência.
+
+Se um recurso não tiver direitos comprovados, a publicação desse recurso fica bloqueada. Não usar essa pendência como justificativa para substituir ou alterar o frontend protegido.
+
+## 3. Arquitetura
+
+| Camada | Responsabilidade e limites |
+|---|---|
+| Transporte | I/O assíncrono, enquadramento conforme contrato, limites, timeouts, cancelamento e encerramento |
+| Protocolo 15.25 | Conversão entre dados de rede e eventos/comandos tipados; sem UI e sem compatibilidade automática |
+| Sessão | Autenticação, personagens, transição de endpoints se aplicável e ciclo de vida |
+| Domínio | Jogador, tiles, criaturas, itens, chat e combate; regras determinísticas independentes de QML |
+| Integração Qt | QObject, propriedades, sinais, roles, modelos e comandos compatíveis com os consumidores originais |
+| Recursos | Catálogos, aparências, URLs, aliases e providers; originais somente leitura |
+| Renderização | Câmera, ordem visual, sprites, animação, luz e composição Qt Quick |
+| Apresentação | QML original, mantido integralmente; recebe estado e encaminha intenções conforme seu contrato existente |
+
+Não impor independência de todo o Qt ao MVP, mas manter sockets, decodificação e regras fora da apresentação. Não importar singletons da engine antiga. Preferir interfaces pequenas com consumidores reais.
+
+Definir ownership e cancelamento explicitamente. Objetos QML/Qt são atualizados na thread apropriada; o renderizador consome estado sincronizado sem compartilhamento arbitrário de objetos mutáveis. Diferenciar comando enviado de alteração confirmada pelo servidor. Não converter erros em sucesso aparente.
+
+A fronteira gráfica proposta é um item integrado ao Qt Quick, compatível com a composição e captura exigidas pelo QML. Não presumir que um renderizador OpenGL externo substitua um item Qt Quick ou que o backend gráfico original esteja conhecido. Validar a solução pelo responsável/CI antes de expandi-la.
+
+## 4. Marcos e critérios de aceite
+
+**Todos os critérios executáveis abaixo são validações futuras do responsável ou CI previamente configurada. Não são autorização para agentes executarem build, cliente, servidor ou testes.** Ver [política](validation-policy.md).
+
+### Fase 0 — Contrato, recursos e licenças
+
+**Dependências:** nenhuma implementação prévia.
+
+- Confirmar revisão, perfil Current 15.25 e capacidades do servidor, sem abrir segredos.
+- Documentar fluxo real de autenticação, endpoints de laboratório e dados de teste.
+- Fixar referência OTClient e licença; não presumir que qualquer fork suporte o contrato.
+- Produzir matriz: funcionalidade, evidência no servidor, referência, fixture, contrato QML e critério de aceite.
+- Inventariar tipos nativos, controllers, propriedades, métodos, sinais, roles, providers e aliases exigidos pelo recorte inicial.
+- Verificar procedência e autorização de QMLs, imagens, fontes, sprites, traduções e código de terceiros.
+- Fixar toolchain, formato de assets e origem de Qt, preservando `.clang-format` e originais.
+
+**Entrega:** contrato 15.25, matriz de compatibilidade, inventário de recursos/integração e decisões de toolchain/licenças.
+
+**Aceite:** ambiente e contrato documentados; reprodução real do servidor confirmada pelo responsável; bloqueios de recursos explicitados. A leitura já realizada não encerra sozinha esta fase.
+
+### Fase 1 — Estrutura do núcleo e transporte
+
+**Depende de:** fase 0.
+
+Detalhamento, ordem de trabalho, matriz de testes e prompts reutilizáveis: [documentação da Fase 1](phase1-bootstrap-transport.md). A documentação não encerra a Fase 0 nem autoriza implementação sem os pré-requisitos.
+
+- Criar configuração CMake por alvo, manifesto vcpkg e presets, sem gerar artefatos pelo agente.
+- Separar núcleo, transporte e testes; preparar executável de diagnóstico sem interface gráfica.
+- Implementar apenas os transportes necessários ao caminho confirmado, limites, processamento incremental, timeout, cancelamento e fechamento limpo.
+- Logging estruturado sem credenciais/tokens; configuração local fora do Git.
+- Escrever testes sintéticos locais para mensagens válidas, parciais, concatenadas, inválidas e truncadas; falhas devem ser controladas.
+
+**Aceite externo:** configuração/build reproduzíveis, testes unitários aprovados, transporte conecta/desconecta no laboratório sem bloquear o processo e reporta erros. Conexão TCP não é evidência de login compatível.
+
+### Fase 2 — Autenticação e sessão mínima
+
+**Depende de:** fase 1.
+
+- Implementar o fluxo verificado, lista/seleção de personagem, transição de endpoint se aplicável, entrada e encerramento de sessão.
+- Máquina de estados explícita; distinguir erros de transporte, autenticação, incompatibilidade e cancelamento.
+- Usar apenas conta de teste e serviços locais controlados. Não contornar autenticação ou proteções.
+
+**Aceite externo:** diagnóstico recebe confirmação real de entrada no mundo; testar credencial inválida, indisponibilidade, incompatibilidade e desconexão durante autenticação. Seleção local de personagem não conta como ingresso confirmado.
+
+### Fase 3 — Estado inicial de mundo e recursos mínimos
+
+**Depende de:** fase 2.
+
+- Modelar posição, tiles, criaturas, jogador e IDs de aparências sem depender de QML.
+- Implementar eventos do estado inicial e atualizações básicas; manter comandos e confirmação do servidor distintos.
+- Carregar metadados e recursos autorizados correspondentes ao alvo. Ausência de recurso deve produzir erro explícito ou comportamento de falha documentado, não estado falso de sucesso.
+- Escrever testes determinísticos de aplicação de eventos e limpeza de sessão.
+
+**Aceite externo:** diagnóstico demonstra estado inicial coerente e atualização de posição confirmada pelo servidor, com testes determinísticos aprovados.
+
+### Fase 4 — Integração do frontend original e mapa mínimo
+
+**Depende de:** fase 3 para integração real; inventário de contratos pode avançar em paralelo após fase 0.
+
+- Carregar progressivamente componentes originais através de host separado, sem alterar ou substituir nenhum QML existente.
+- Implementar os tipos/controllers/modelos efetivamente exigidos, com nomes e semântica preservados. Não preencher métodos com sucesso simulado para ocultar dependências.
+- Reproduzir o contrato de composição de `clientwindow.qml` e integração de `gamewindow.qml`. Instanciar a tela inteira somente quando as dependências de criação estiverem atendidas.
+- Registrar tipos nativos ausentes, enums, traduções, providers e mapeamentos externos. Não editar descritores `qmldir` originais.
+- Implementar mapa integrado ao Qt Quick preservando camadas de `MapWindowPane.qml`: cenário, iluminação, HUD e entrada.
+- Validar coordenadas, clipping, DPI e backend gráfico; não presumir ganho de performance ou fidelidade sem medição.
+
+**Aceite externo:** autenticar, escolher personagem e visualizar mapa real no frontend original; sem erros obrigatórios de tipos/imports/recursos; clique e desenho alinhados em 100%, 150% e 200%; originais íntegros.
+
+Se o carregamento exigir dependências ainda não implementadas, isso aumenta o marco ou o bloqueia. Não autoriza simplificar telas, ocultar alterações em uma cópia ou adotar frontend substituto.
+
+### Fase 5 — MVP jogável
+
+**Depende de:** fase 4.
+
+Entregar incrementos pequenos na ordem:
+
+1. Movimento e correções do servidor.
+2. Chat, histórico e modelos compatíveis.
+3. Inventário, containers e operações mínimas de itens.
+4. Seleção de alvo, ataque básico e estado de combate.
+
+Para cada incremento: evidência no servidor → eventos/domínio → adaptador Qt → integração da tela original → testes. `ChatOutput.qml` exige medição/seleção no modelo; `container.qml` exige helpers, roles e notificações específicos. Não tratá-los como listas passivas.
+
+**Aceite externo:** dois clientes de teste demonstram movimento observado, chat, itens e combate com estados consistentes. Recursos fora do MVP não são implementados silenciosamente como sucesso; limitações ficam explícitas no host/contrato e na documentação, sem alterar telas originais.
+
+### Fase 6 — Estabilização e publicação
+
+**Depende de:** fase 5; planejamento de automação começa na fase 1.
+
+- Build/testes automatizados Windows e empacotamento Qt, acionados externamente ao agente.
+- Sessões prolongadas, interrupção de rede, cancelamento, limpeza de estado e consumo de memória.
+- Medir desempenho em máquina/cena/backend definidos; fixar metas após baseline.
+- Incluir avisos de licença, atribuições e instruções de ambiente de teste.
+- Validar instalação em máquina limpa sem depender de uma instalação do cliente original.
+- Conferir que originais distribuídos correspondem aos aprovados e que todos os direitos estão documentados.
+
+**Aceite externo:** release reproduzível, testes documentados, recursos redistribuíveis verificados, limitações publicadas e fidelidade/estabilidade demonstradas nos cenários definidos.
+
+## 5. Estratégia de testes e engenharia
+
+- Proposta: GoogleTest para regras de núcleo e Qt Test/Qt Quick Test para integração; decisão final na fase 0.
+- CTest como orquestrador proposto; nenhuma suíte criada ou executada nesta etapa documental.
+- Unitários independentes de servidor; integração com servidor/banco descartáveis em fluxo separado, nunca banco de trabalho.
+- Fixtures locais determinísticas; não usar dumps de origem desconhecida nem capturas contendo credenciais.
+- Verificar propriedades, sinais, roles, notificações, lifecycle e threads além do valor visual final.
+- Separar testes de correção, benchmarks e testes ponta a ponta.
+- Toda regressão deve preservar evidência verificável do caminho defeituoso. Testes escritos não equivalem a testes aprovados.
+- Agentes podem fazer leitura, diff, hashes e diagnóstico estático; não executar configurações, builds, CTest, cliente, servidor ou pipelines.
+
+## 6. Organização futura proposta
+
+Somente documentação e instruções são criadas nesta tarefa. A estrutura abaixo não foi inicializada:
+
+| Caminho proposto | Responsabilidade |
+|---|---|
+| `client/CMakeLists.txt` | Alvos separados e declaração de testes |
+| `client/CMakePresets.json` | Configurações reproduzíveis Windows, sem caminhos pessoais |
+| `client/vcpkg.json` | Dependências e baseline fixado |
+| `client/src/core/` | Domínio e regras |
+| `client/src/network/` | Transporte |
+| `client/src/protocol/` | Contrato exclusivo 15.25 |
+| `client/src/session/` | Sessão e casos de uso |
+| `client/src/qtbridge/` | Tipos, controllers, modelos e adaptação Qt |
+| `client/src/render/` | Renderização e sincronização |
+| `client/resources/` | Manifestos/aliases externos e recursos novos autorizados, sem cópias modificadas dos originais |
+| `client/tests/` | Testes e harnesses isolados |
+| `.github/workflows/client-ci.yml` | Possível CI Windows futura, não criada nem disparada |
+
+Não criar uma árvore `client/qml/` para reimplementar ou substituir o frontend do jogo. Se necessário, um harness separado apenas hospeda os componentes originais e testa contratos, sem alterar sua semântica. Não duplicar ou substituir a `.clang-format` da raiz.
+
+## 7. Riscos e limites do MVP
+
+| Risco | Tratamento |
+|---|---|
+| Fork OTClient incompatível com o servidor | Fixar referência verificável; servidor é contrato efetivo |
+| Diferenças dentro de 15.25 | Fixar revisão/capacidades, não só número |
+| QML depende de tipos nativos ausentes | Inventário e adaptação compatível; nunca editar frontend |
+| Sprites/traduções/aliases incompletos | Bloqueio explícito, inventário e metadados autorizados |
+| Mistura de runtimes/ABIs Qt | Origem e versões únicas, validação externa |
+| Corridas de thread e lifecycle | Ownership, eventos tipados e sincronização testáveis |
+| Licença insuficiente para distribuição | Não publicar até comprovação, sem alterar originais |
+| Regras confundidas com bloqueio técnico | Revisão e hashes; não alegar proteção automática |
+
+Fora do MVP: versões antigas/futuras, serviços oficiais, loja/pagamentos, criação web de contas, atualizador automático, todos os sistemas avançados (Forge/Prey/Bosstiary etc.) e multiplataforma. Os componentes dessas funcionalidades permanecem preservados, mesmo sem implementação correspondente no MVP.
+
+## 8. Próximos passos e estado real
+
+Próxima atividade de engenharia: concluir fase 0 e revisar pendências de contrato, referência OTClient, assets e toolchain. A aprovação do plano e a habilitação de edição não autorizam iniciar toda a implementação nem executar build/testes.
+
+Nesta rodada foram apenas inspecionadas fontes e produzidos documentos/regras. Não há compatibilidade operacional, métricas ou testes aprovados a declarar. Nenhum backend funcional foi encontrado nos recursos e nenhuma limpeza deles é recomendada.
+
+Referências: [auditoria](backend-resource-audit.md), [padrões de código](coding-standards.md), [política de validação](validation-policy.md), [migração de regras](rules-migration.md) e [instruções dos agentes](../.github/copilot-instructions.md).
