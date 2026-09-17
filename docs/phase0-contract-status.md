@@ -11,6 +11,15 @@ Data: 2026-09-17. Estado: **em andamento; aceite não concluído**. Nenhuma impl
 - O responsável confirmou que o cliente local compila com as alterações C++ atuais, apresenta seleção de personagens e permite login e jogo normal no servidor 15.25, sem problemas relevantes observados. É **validação manual relatada pelo responsável**, não execução do agente nem garantia de ausência de defeitos. Falta vincular o relato às revisões/builds exatas utilizadas.
 - O responsável autorizou continuidade automática das etapas e commits das entregas revisadas, respeitando todas as restrições. A progressão deve parar quando depender de informação ou ação sua; não há autorização para push ou execução de projetos.
 
+## Confirmação do laboratório — 2026-09-17
+
+- O responsável confirmou que ambos os projetos de referência estão compilados na última versão. O relato associa o funcionamento aos fontes atuais segundo o responsável; não constitui identificação criptográfica dos binários nem nova medição Git. As revisões observadas abaixo permanecem evidências da inspeção, sem atribuição automática aos executáveis.
+- Modo confirmado: autenticação por **sessão**, com **e-mail e senha**. O servidor possui 2FA, mas sua implementação no novo cliente foi adiada pelo responsável para depois do incremento inicial. O canal do segundo fator não foi confirmado.
+- Endpoint de login confirmado: `http://127.0.0.1:8080/api/v1/webservice`. O `init.lua` fornecido pelo responsável declara esse valor em `loadConfig().webservice` e atribui a configuração a `Services`. O arquivo externo não foi alterado.
+- Houve uma tentativa GET indevida nesta rodada, fora do escopo documental, sem credenciais, redirects ou leitura de corpo. Resultado: `ConnectFailure`, sem resposta HTTP. Não houve repetição nem tentativa de autenticação. O resultado não valida a rota POST, o login por sessão ou a disponibilidade em outro momento; não contradiz o relato funcional do responsável. Não repetir sondagens para suprir pendências.
+- HTTP sem TLS permanece restrito ao laboratório em loopback. Esse endereço identifica o serviço HTTP, não o endereço/porta TCP do mundo, que continuam pendentes de confirmação; não assumir a porta 8080 para jogo.
+- Adiar 2FA não significa desativar proteção no servidor: se uma tentativa exigir desafio, o incremento inicial deve informar fluxo não suportado e não prosseguir como autenticado. Não contornar o desafio, reutilizar sessão indevidamente ou simular sucesso. Uma futura validação sem 2FA depende de conta de laboratório para a qual o serviço não exija desafio, sem fornecer credenciais ao agente.
+
 ## Revisões e limites da evidência
 
 | Base | Revisão HEAD observada | Estado dos arquivos examinados |
@@ -21,7 +30,7 @@ Data: 2026-09-17. Estado: **em andamento; aceite não concluído**. Nenhuma impl
 
 Os sete fontes do servidor são `src/core.hpp`, `src/server/network/protocol/protocol_profile.cpp`, `src/server/network/protocol/protocolgame.cpp`, `src/server/network/http/routes.cpp`, `src/server/network/http/webservice/webservice.cpp`, `src/server/network/http/webservice/handlers/login_handler.cpp` e `src/io/iologindata.cpp`. Estado limpo desses caminhos não certifica toda a árvore nem o binário utilizado pelo responsável.
 
-Não foram consultados remotes, configurações ativas, chaves, bancos, logs reais, dumps ou artefatos de build. Houve consultas públicas à documentação Qt e aos metadados vcpkg; não houve conexão aos serviços do jogo, execução de código de projeto, configuração, build, instalação ou testes. Linhas indicadas são localizadores da revisão inspecionada, não contratos estáveis de localização.
+Não foram consultados remotes, chaves, bancos, logs reais, dumps ou artefatos de build. A configuração de serviços em `init.lua` foi fornecida explicitamente pelo responsável; não houve leitura adicional de configurações ativas para inferir segredos ou destinos. Houve consultas públicas à documentação Qt e aos metadados vcpkg. A tentativa GET sem conexão estabelecida está registrada acima; não houve execução de código de projeto, configuração, build, instalação ou testes executáveis. Linhas indicadas são localizadores da revisão inspecionada, não contratos estáveis de localização.
 
 ## Contrato estático do servidor 15.25
 
@@ -39,7 +48,7 @@ Caminhos relativos a `E:\caverot-server`:
 | Sessão | Mesmo handler, `:305–344` | Emissão opaca com persistência de hash e expiração calculada; falha impede sucesso. Revogação e renovação ainda precisam de análise própria |
 | Entrada no mundo | `protocolgame.cpp:1420–1439` e `src/io/iologindata.cpp:24–66` | Validação de sessão/conta/personagem depende do modo de autenticação. Lista recebida e seleção local não confirmam ingresso |
 
-O fluxo **HTTP → sessão → jogo TCP** está identificado nos fontes do cliente e do servidor. O responsável confirmou seleção, login e jogo normais; ainda falta vincular a execução à configuração efetiva e às revisões/builds utilizadas. HTTP sem TLS já identificado na inspeção anterior permanece restrito ao laboratório loopback; não sondar serviços nem enviar mensagens por suposição. Nenhum material sensível deve ser anexado como evidência.
+O fluxo **HTTP → sessão → jogo TCP** está identificado nos fontes do cliente e do servidor. O responsável confirmou seleção, login e jogo normais com builds atuais, sessão e endpoint HTTP conforme a seção de confirmação do laboratório. A identificação exata dos binários e o destino TCP do mundo permanecem pendentes. HTTP sem TLS fica restrito ao laboratório loopback; não sondar serviços nem enviar mensagens por suposição. Nenhum material sensível deve ser anexado como evidência.
 
 ## Fluxo do cliente funcional — inspeção estática
 
@@ -213,8 +222,8 @@ Fontes públicas consultadas: [baseline fixo](https://github.com/microsoft/vcpkg
 
 ## Pendências para o aceite
 
-1. Responsável: vincular a confirmação já fornecida de compilação, seleção, login e jogo às builds/revisões exatas utilizadas. Não anexar logs reais, senhas, tokens ou dumps; não é necessário repetir o resultado geral já relatado.
-2. Responsável: confirmar modo de autenticação e endpoints de laboratório sem dados sensíveis; documentar as condições da confirmação manual.
+1. Rastreabilidade: responsável confirmou builds atuais e funcionamento. Identificação exata dos binários/revisões permanece para o registro de validação externa; não pedir novamente o resultado geral nem tratar a expressão “última versão” como hash verificado.
+2. Laboratório: sessão, e-mail/senha e endpoint HTTP confirmados acima. Falta endereço/porta TCP do jogo para a validação de conexão; não presumir a porta HTTP nem sondar serviços. 2FA foi adiado, não removido do servidor; seu canal deve ser confirmado quando esse recorte for implementado.
 3. Toolchain: seleção aprovada e ambiente inventariado; permanecem as verificações técnicas acima, especialmente Qt/WebEngine com MSVC 14.51, versão do Ninja e disponibilidade do baseline. Não exigir instalação antiga ou alteração do ambiente para cumprir a recomendação substituída. Ports/features documentados não equivalem a resolução executada.
 4. Recursos: documentar origem, disponibilidade e correspondência de sprites, metadados, traduções e IDs.
 5. Contratos: completar inventário transitivo e matriz do MVP. Manter o caminho de chat afetado bloqueado sem solução compatível demonstrada.

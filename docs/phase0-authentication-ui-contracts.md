@@ -70,6 +70,8 @@ Nenhum cenário executado nesta etapa:
 
 A busca filtrada em `**/*.{qml,js}` do workspace, respeitando exclusões do editor, não revelou a instanciação desses diálogos por seus nomes, nem contrato específico de autenticador/TOTP ou dispositivo confiável. Não é prova de ausência na implementação original: a orquestração pode ser nativa e não está disponível aqui.
 
-O frontend contém o diálogo de e-mail; **não está demonstrado que o segundo fator efetivo do servidor usa esse canal**. Antes de integrar o caminho, confirmar modo ativo e correspondência de estados. Não adaptar um desafio de outra natureza silenciosamente para e-mail.
+O frontend contém o diálogo de e-mail; **não está demonstrado que o segundo fator efetivo do servidor usa esse canal**. Antes de integrar o caminho, confirmar correspondência de estados. Não adaptar um desafio de outra natureza silenciosamente para e-mail.
 
-Continuam pendentes a revisão/build efetivamente usada no relato funcional, modo de autenticação ativo e endpoints controlados de laboratório, já enumerados no relatório geral. Essas informações devem vir do responsável sem senhas, códigos, tokens, configurações completas, logs reais ou dumps. A Fase 1 continua não iniciada; runtime e aceite da Fase 0 não são substituídos por esta inspeção.
+O responsável confirmou builds atuais, autenticação por sessão com e-mail/senha e login em `http://127.0.0.1:8080/api/v1/webservice`. Informou que existe 2FA, mas que não é necessário implementá-lo inicialmente. O primeiro incremento deve rejeitar explicitamente a continuação de um desafio não suportado, sem ignorá-lo ou apresentar sucesso. Os cenários de entrada/reenvio de código acima ficam para o incremento posterior; o tratamento seguro de desafio não suportado pertence ao inicial.
+
+Endereço/porta TCP do jogo e identificação exata dos binários no registro externo continuam pendentes. Não é necessário repetir as confirmações já recebidas nem fornecer senhas, códigos, tokens, configurações completas, logs reais ou dumps. A Fase 1 continua não iniciada; runtime e aceite da Fase 0 não são substituídos por esta inspeção.

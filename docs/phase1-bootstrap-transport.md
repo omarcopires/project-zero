@@ -139,9 +139,11 @@ Ninja, Qt Network, GoogleTest e Qt Test foram selecionados na [Fase 0](phase0-co
 6. **Revisão estática:** registrar arquivos, contratos atendidos, bloqueios e verificações realizadas. Não concluir a fase com base apenas nessa revisão.
 7. **Aceite externo:** responsável ou CI previamente configurada executa configurações/testes e registra resultados associados à revisão. Nenhum prompt dispara CI ou autoriza commit automático.
 
-### Caminho HTTP condicional
+### Caminho HTTP confirmado pelo responsável
 
-O fluxo HTTP → sessão → TCP foi identificado nos fontes do cliente e do servidor; seleção, login e jogo foram relatados pelo responsável. Falta associar esse relato às revisões/builds e à configuração efetiva. Para esse caminho, a Fase 1 inclui somente a infraestrutura HTTP assíncrona necessária: limites de resposta, deadline, cancelamento, fechamento e classificação de erros. A composição de autenticação, credenciais e interpretação de sessão pertence à Fase 2. Não seguir redirects para endpoints não autorizados nem implementar fallback automático para login TCP. HTTP sem TLS fica restrito ao laboratório em loopback; exposição externa exige decisão de transporte seguro.
+O fluxo HTTP → sessão → TCP foi identificado nos fontes do cliente e do servidor. O responsável confirmou builds atuais, seleção/login/jogo funcionais e autenticação por sessão com e-mail/senha em `http://127.0.0.1:8080/api/v1/webservice`. A tentativa GET fora do escopo, encerrada em `ConnectFailure`, está registrada no relatório da Fase 0 e não valida autenticação. A identificação exata dos binários fica para o registro externo. Endereço/porta TCP do jogo permanecem pendentes, sem inferência a partir da porta HTTP.
+
+Para esse caminho, a Fase 1 inclui somente a infraestrutura HTTP assíncrona necessária: limites de resposta, deadline, cancelamento, fechamento e classificação de erros. A composição de autenticação, credenciais e interpretação de sessão pertence à Fase 2. O responsável adiou 2FA para depois do incremento inicial: um desafio exigido pelo serviço deve resultar em fluxo não suportado, nunca em sucesso ou bypass. Não seguir redirects para endpoints não autorizados nem implementar fallback automático para login TCP. HTTP sem TLS fica restrito ao laboratório em loopback; exposição externa exige decisão de transporte seguro.
 
 ### Contrato operacional mínimo
 
