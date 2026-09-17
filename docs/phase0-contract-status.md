@@ -68,6 +68,8 @@ Caminhos relativos a `E:\caverot-client`, HEAD `02e0ae82693cbb7036983329d0324615
 
 Recorte parcial: composição, login e seleção de personagem; mapa/chat/contêiner apenas para planejar o MVP. Caminhos abaixo relativos a `qt/qml/qmlcomponents/qml/`. Chamadas e acessos QML não comprovam assinaturas, tipos de retorno ou sinais C++ originais.
 
+O [inventário de recursos da composição inicial e seleção](phase0-initial-resource-contracts.md) detalha sete referências literais de imagens, dois aliases premium necessários, URLs dinâmicas, fontes, traduções e ownership de modelos/aparências. Correspondentes físicos foram identificados para as sete imagens; registro de recursos, sprites e compatibilidade executável continuam pendentes. Esse fechamento parcial não encerra a Fase 0.
+
 | Consumidor | Contrato observado | Obrigação do adaptador / bloqueio |
 |---|---|---|
 | `clientwindow.qml:1–6,35–58,113–121` | Import `qrc:/qt/qml/qmlcomponents/qml`, `windowTitle`, `windowTitleExtension`, `backgroundImageVisible`, item `placeholder` | Mapeamento externo e composição ainda necessários; presença de filho é critério visual, não estado de sessão |
