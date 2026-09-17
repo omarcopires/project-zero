@@ -1,6 +1,6 @@
 # Plano do novo cliente
 
-Data: 2026-09-17. Estado: plano-base aprovado; implementação não iniciada. Este documento consolida o planejamento da sessão e incorpora a exigência posterior de preservar integralmente o frontend original.
+Data: 2026-09-17. Estado: plano-base aprovado; Fase 0 documental concluída com ressalvas; Fase 1 e implementação não iniciadas. Este documento consolida o planejamento, a preservação integral do frontend original e o encerramento solicitado pelo responsável, com gates técnicos explícitos.
 
 ## 1. Decisões confirmadas
 
@@ -48,7 +48,7 @@ Resultados de inspeção somente leitura da fase de planejamento, não validaç�
 | `CMakePresets.json`, `cmake/modules/BaseConfig.cmake` | Servidor usa toolchain Windows/MSVC/vcpkg e C++23; não herdar automaticamente padrão ou toolset do cliente |
 | `tests/README.md` e `tests/unit/server/network/protocol/multiprotocol_test.cpp` | Testes úteis como referência; não executados. Integração pode recriar banco |
 
-O fluxo candidato é **HTTP → sessão → conexão de jogo TCP**, sujeito à confirmação da configuração efetiva. Não enviar mensagens de login por suposição para descobrir o contrato. O serviço HTTP inspecionado usa `httplib::Server`, sem TLS nativo evidenciado nesse trecho; manter laboratório em loopback. Qualquer exposição futura exige transporte seguro planejado.
+O fluxo **HTTP → sessão → conexão de jogo TCP** foi rastreado e confirmado pelo responsável: sessão com e-mail/senha, API `http://127.0.0.1:8080/api/v1/webservice` e mundo `localhost:7172`. Login TCP 7171 também informado, sem intercambialidade automática com HTTP. Não enviar mensagens de login por suposição. O serviço HTTP inspecionado usa `httplib::Server`, sem TLS nativo evidenciado nesse trecho; manter laboratório em loopback. Qualquer exposição futura exige transporte seguro planejado.
 
 Não foram abertos arquivos ativos potencialmente contendo credenciais, bancos, chaves ou logs. O número 15.25 não resolve sozinho capacidades, formato dos assets ou revisão de conteúdo.
 
@@ -58,15 +58,15 @@ A [auditoria](backend-resource-audit.md) encontrou recursos Qt, código QML/JS e
 
 A quantidade de imagens não demonstra a presença de sprites de mundo compatíveis. Catálogos de traduções, aliases e associação entre IDs e aparências precisam ser verificados. O pacote local de recursos Qt não substitui uma distribuição válida do SDK/runtime.
 
-### Decisões ainda abertas
+### Decisões fixadas e verificações restantes
 
-Progresso da Fase 0, evidências e bloqueios: [relatório parcial](phase0-contract-status.md). O responsável escolheu Qt pelo vcpkg e confirmou o funcionamento de `E:\caverot-client`, cliente que mantém ao longo dos anos e referência funcional desta etapa. A revisão inspecionada está registrada; não se aguarda outra URL nem se adota o motor antigo.
+Estado da Fase 0: [encerramento documental com ressalvas](phase0-acceptance.md). O responsável confirmou o funcionamento de `E:\caverot-client`, cliente que mantém e referência funcional desta etapa, com executáveis nas últimas modificações. HEADs reconferidos; não se aguarda outra URL nem se adota o motor antigo.
 
-1. Configuração efetiva de autenticação e capacidades do servidor 15.25. Compilação, seleção, login e jogo normais foram confirmados pelo responsável; falta vincular o relato às builds/revisões exatas utilizadas, não repetir o resultado geral.
-2. Versão C++, Qt, MSVC, CMake, vcpkg/baseline, triplet e backend gráfico.
-3. Origem única de Qt decidida: **ports vcpkg**. Cobertura de módulos/features e compatibilidade de ABI permanecem pendentes; não misturar com SDK externo.
-4. Disponibilidade de sprites, traduções, metadados e correspondência de IDs.
-5. Equipe, disponibilidade, orçamento de desempenho e ambiente de referência.
+1. Laboratório e autenticação confirmados por relato; capacidades e formatos restantes devem ser rastreados antes dos respectivos incrementos, sem exigir nova confirmação geral de login/jogo.
+2. Fixados: C++20, Qt 6.11.1, MSVC 14.51.36231, CMake 4.3.1-msvc1, baseline vcpkg `fa8cecf91d7f31a1715a7a6524f208897ffb33ce`, `x64-windows` dinâmico. Backend gráfico permanece posterior; Ninja instalado, versão ainda não identificada.
+3. Origem única de Qt: **ports vcpkg**, módulos/features selecionados no relatório. Resolução e ABI não validadas externamente; objeto de baseline não resolvido na consulta local. Não misturar com SDK externo ou alterar ambiente por suposição.
+4. Sprites e metadados locais inventariados; todas as referências do catálogo existem, mas aparências diferem do servidor. Traduções não localizadas; fontes do Windows presentes, sem validação gráfica. Correspondência de IDs é gate de recursos.
+5. Equipe, disponibilidade e orçamento de desempenho não fundamentam promessa de prazo; metas de desempenho dependem de baseline futuro.
 
 A ausência de um recurso deve ser registrada como bloqueio técnico, nunca usada como justificativa para substituir ou alterar o frontend protegido.
 
@@ -107,7 +107,9 @@ A fronteira gráfica proposta é um item integrado ao Qt Quick, compatível com 
 
 **Entrega:** contrato 15.25, matriz de compatibilidade, inventário de recursos/integração e decisões de toolchain.
 
-**Aceite:** ambiente e contrato documentados; reprodução real do servidor confirmada pelo responsável; bloqueios de recursos explicitados. A leitura já realizada não encerra sozinha esta fase.
+**Aceite documental:** ambiente e fluxo documentados; reprodução real do servidor confirmada pelo responsável; bloqueios de recursos explicitados. Após a solicitação de finalizar a etapa e as confirmações finais, a entrega documental foi encerrada com ressalvas em 2026-09-17. Não se afirma contrato global completo nem aceite técnico.
+
+**Replanejamento explícito:** bootstrap sem interface pode avançar a partir da base documentada. Validação de toolchain é gate do aceite da Fase 1; evidência do formato é obrigatória antes de implementar seu enquadramento; correspondência de assets antes dos recursos da Fase 3; contratos transitivos, fontes/traduções e plugins antes da integração da Fase 4; bloqueio de chat mantido para o caminho afetado da Fase 5. Os critérios detalhados estão no [termo](phase0-acceptance.md). Nada disso autoriza build pelo agente ou afirmação de validações não realizadas.
 
 ### Fase 1 — Estrutura do núcleo e transporte
 
@@ -235,8 +237,8 @@ Fora do MVP: versões antigas/futuras, serviços oficiais, loja/pagamentos, cria
 
 ## 8. Próximos passos e estado real
 
-Próxima atividade de engenharia: concluir fase 0 e revisar pendências de contrato, referência OTClient, assets e toolchain. A aprovação do plano e a habilitação de edição não autorizam iniciar toda a implementação nem executar build/testes.
+Próxima atividade de engenharia: bootstrap sem interface da Fase 1, ainda não iniciado. A Fase 0 documental foi encerrada com ressalvas após as verificações e confirmações do responsável. Gates de contrato, assets, integração visual e toolchain permanecem explícitos; o encerramento não autoriza implementar contratos desconhecidos ou executar build/testes pelo agente.
 
-Nesta rodada foram apenas inspecionadas fontes e produzidos documentos/regras. Não há compatibilidade operacional, métricas ou testes aprovados a declarar. Nenhum backend funcional foi encontrado nos recursos e nenhuma limpeza deles é recomendada.
+Foram inspecionados fontes e recursos, verificados catálogo/hashes e produzidos documentos/regras. Não há compatibilidade operacional do cliente novo, métricas ou testes aprovados a declarar. Nenhum backend funcional foi encontrado nos recursos e nenhuma limpeza deles é recomendada.
 
 Referências: [auditoria](backend-resource-audit.md), [padrões de código](coding-standards.md), [política de validação](validation-policy.md), [migração de regras](rules-migration.md) e [instruções dos agentes](../.github/copilot-instructions.md).

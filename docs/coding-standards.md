@@ -106,7 +106,7 @@ Na implementação autorizada, escrever testes determinísticos de pattern com h
 ## CMake, vcpkg e testes
 
 - Usar configuração por alvo e dependências explícitas; não espalhar flags globais que afetem bibliotecas externas.
-- vcpkg em modo manifesto, baseline e triplet fixados. Origem única de Qt: ports vcpkg, conforme [decisão da Fase 0](phase0-contract-status.md). Não misturar instalações/ABIs de Qt; versões, módulos/features, runtime e padrão C++ ainda precisam ser fixados.
+- vcpkg em modo manifesto, baseline e triplet fixados. Origem única de Qt: ports vcpkg, conforme [decisão da Fase 0](phase0-contract-status.md). Versões, módulos/features, runtime e C++20 foram selecionados documentalmente; sua resolução e compatibilidade ainda exigem validação externa. Não misturar instalações/ABIs de Qt.
 - Presets versionados devem ser reproduzíveis, sem caminhos pessoais ou segredos; configuração local separada.
 - Tests unitários, integração Qt, integração de servidor e benchmarks têm responsabilidades distintas.
 - Registrar procedimentos para responsável/CI; não executar configuração, instalação com compilação, build ou testes pelo agente.

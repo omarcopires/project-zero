@@ -17,7 +17,7 @@ Esta fase só inicia após a Fase 0 entregar:
 - origem única de Qt: **ports vcpkg**, com módulos/features selecionados na Fase 0; resolução e compatibilidade de ABI ainda precisam ser validadas externamente;
 - matriz de compatibilidade e inventário inicial de contratos do frontend.
 
-O [relatório parcial da Fase 0](phase0-contract-status.md) registra o avanço e os bloqueios; ainda não atende a todos os pré-requisitos acima.
+O [encerramento documental da Fase 0](phase0-acceptance.md) registra a base entregue e as ressalvas, conforme replanejamento explícito do plano. O bootstrap sem interface pode avançar; a Fase 1 permanece não iniciada nesta entrega. O contrato global não está fechado: evidência exata do enquadramento é obrigatória antes de implementá-lo. Resolução do baseline, versão do Ninja e compatibilidade da toolchain são gates do aceite externo da Fase 1, não resultados presumidos. Recursos e contratos visuais continuam gates dos incrementos correspondentes.
 
 ## Escopo
 

@@ -1,6 +1,6 @@
-# Fase 0 — Contratos e decisões pendentes
+# Fase 0 — Contratos, decisões e ressalvas
 
-Data: 2026-09-17. Estado: **em andamento; aceite não concluído**. Nenhuma implementação iniciada. Complementa o [plano-base](project-plan-2026-09-17.md) e a [auditoria de recursos](backend-resource-audit.md).
+Data: 2026-09-17. Estado: **entrega documental concluída com ressalvas; aceite técnico não declarado**. Nenhuma implementação iniciada. O [termo de encerramento](phase0-acceptance.md) e a [verificação de assets](phase0-assets-verification.md) consolidam as confirmações finais e os gates restantes. Complementa o [plano-base](project-plan-2026-09-17.md) e a [auditoria de recursos](backend-resource-audit.md).
 
 ## Decisões desta rodada
 
@@ -8,7 +8,7 @@ Data: 2026-09-17. Estado: **em andamento; aceite não concluído**. Nenhuma impl
 - Preservar a instalação do Visual Studio, `D:\vcpkg`, SDKs, PATH e variáveis do ambiente. Não instalar toolset antigo, atualizar ou trocar o checkout compartilhado, executar bootstrap nem instalar dependências. Preferir ferramentas modernas não significa seguir `latest`/`master` móveis ou habilitar recursos experimentais automaticamente; registrar versões explícitas para reprodução.
 - O responsável esclareceu que `E:\caverot-client` é seu cliente, modificado e mantido por ele ao longo dos anos. Ele é a **referência funcional e de contratos** desta etapa; não é necessário indicar outra URL. Isso não implica adoção do motor antigo: Clean Architecture e nomes sem marca continuam obrigatórios.
 - O projeto novo é **fechado, com acesso restrito ao responsável**. Uma eventual abertura ou publicação será decidida por ele no futuro, fora do escopo atual. O frontend protegido permanece integralmente preservado.
-- O responsável confirmou que o cliente local compila com as alterações C++ atuais, apresenta seleção de personagens e permite login e jogo normal no servidor 15.25, sem problemas relevantes observados. É **validação manual relatada pelo responsável**, não execução do agente nem garantia de ausência de defeitos. Falta vincular o relato às revisões/builds exatas utilizadas.
+- O responsável confirmou que o cliente local compila com as alterações C++ atuais, apresenta seleção de personagens e permite login e jogo normal no servidor 15.25, sem problemas relevantes observados. É **validação manual relatada pelo responsável**, não execução do agente nem garantia de ausência de defeitos. Na confirmação final, ele associou os executáveis às últimas modificações; HEADs reconferidos, sem atestação criptográfica fonte/binário.
 - O responsável autorizou continuidade automática das etapas e commits das entregas revisadas, respeitando todas as restrições. A progressão deve parar quando depender de informação ou ação sua; não há autorização para push ou execução de projetos.
 
 ## Confirmação do laboratório — 2026-09-17
@@ -17,7 +17,7 @@ Data: 2026-09-17. Estado: **em andamento; aceite não concluído**. Nenhuma impl
 - Modo confirmado: autenticação por **sessão**, com **e-mail e senha**. O servidor possui 2FA, mas sua implementação no novo cliente foi adiada pelo responsável para depois do incremento inicial. O canal do segundo fator não foi confirmado.
 - Endpoint de login confirmado: `http://127.0.0.1:8080/api/v1/webservice`. O `init.lua` fornecido pelo responsável declara esse valor em `loadConfig().webservice` e atribui a configuração a `Services`. O arquivo externo não foi alterado.
 - Houve uma tentativa GET indevida nesta rodada, fora do escopo documental, sem credenciais, redirects ou leitura de corpo. Resultado: `ConnectFailure`, sem resposta HTTP. Não houve repetição nem tentativa de autenticação. O resultado não valida a rota POST, o login por sessão ou a disponibilidade em outro momento; não contradiz o relato funcional do responsável. Não repetir sondagens para suprir pendências.
-- HTTP sem TLS permanece restrito ao laboratório em loopback. Esse endereço identifica o serviço HTTP, não o endereço/porta TCP do mundo, que continuam pendentes de confirmação; não assumir a porta 8080 para jogo.
+- HTTP sem TLS permanece restrito ao laboratório em loopback. Na confirmação final, o responsável informou servidor em `localhost`, login TCP 7171 e mundo 15.25 TCP 7172. O destino de laboratório é `localhost:7172`; não assumir a porta 8080 para jogo nem criar fallback do fluxo HTTP para login TCP.
 - Adiar 2FA não significa desativar proteção no servidor: se uma tentativa exigir desafio, o incremento inicial deve informar fluxo não suportado e não prosseguir como autenticado. Não contornar o desafio, reutilizar sessão indevidamente ou simular sucesso. Uma futura validação sem 2FA depende de conta de laboratório para a qual o serviço não exija desafio, sem fornecer credenciais ao agente.
 
 ## Revisões e limites da evidência
@@ -48,7 +48,7 @@ Caminhos relativos a `E:\caverot-server`:
 | Sessão | Mesmo handler, `:305–344` | Emissão opaca com persistência de hash e expiração calculada; falha impede sucesso. Revogação e renovação ainda precisam de análise própria |
 | Entrada no mundo | `protocolgame.cpp:1420–1439` e `src/io/iologindata.cpp:24–66` | Validação de sessão/conta/personagem depende do modo de autenticação. Lista recebida e seleção local não confirmam ingresso |
 
-O fluxo **HTTP → sessão → jogo TCP** está identificado nos fontes do cliente e do servidor. O responsável confirmou seleção, login e jogo normais com builds atuais, sessão e endpoint HTTP conforme a seção de confirmação do laboratório. A identificação exata dos binários e o destino TCP do mundo permanecem pendentes. HTTP sem TLS fica restrito ao laboratório loopback; não sondar serviços nem enviar mensagens por suposição. Nenhum material sensível deve ser anexado como evidência.
+O fluxo **HTTP → sessão → jogo TCP** está identificado nos fontes do cliente e do servidor. O responsável confirmou seleção, login e jogo normais, executáveis nas últimas modificações, sessão, endpoint HTTP e mundo em `localhost:7172`. Os HEADs foram reconferidos sem mudança; o relato não é atestação criptográfica dos binários. HTTP sem TLS fica restrito ao laboratório loopback; não sondar serviços nem enviar mensagens por suposição. Nenhum material sensível deve ser anexado como evidência.
 
 ## Fluxo do cliente funcional — inspeção estática
 
@@ -70,7 +70,7 @@ Caminhos relativos a `E:\caverot-client`, HEAD `02e0ae82693cbb7036983329d0324615
 - Domínio/casos de uso novos devem distinguir autenticação, lista disponível, conexão ao mundo, entrada confirmada e mapa disponível, com ownership e cancelamento explícitos. Globais `G`, `g_game` e arquitetura Lua são evidência da referência, não desenho a copiar.
 - O ramo examinado de cancelamento HTTP não demonstrou cancelamento da operação ou invalidação da resposta tardia. O backend novo precisa definir isso e escrever testes determinísticos; não se trata de defeito reproduzido na referência.
 - `src/framework/http/session.cpp:24–32` desabilita verificação de certificado no ramo HTTPS examinado. **Não reproduzir essa configuração**: HTTPS no backend novo deve verificar cadeia de confiança e identidade do servidor. O funcionamento relatado não comprova segurança desse transporte.
-- Inicialização de versão, retomada completa da fila de espera, revogação/renovação de sessão e destinos efetivos continuam sem fechamento neste recorte. Não foi aberta configuração ativa para suprir essas lacunas.
+- Inicialização de versão, retomada completa da fila de espera e revogação/renovação de sessão continuam sem fechamento neste recorte. O destino de laboratório foi confirmado pelo responsável como `localhost:7172`; overrides/proxy não foram verificados. Não foi aberta configuração ativa para suprir essas lacunas.
 - Nenhum pacote binário, implementação ou conteúdo sensível foi copiado. A observação de contratos e o relato funcional não comprovam compatibilidade do frontend QML deste workspace.
 
 ## Inventário inicial de contratos QML
@@ -101,7 +101,7 @@ O [inventário de recursos da composição inicial e seleção](phase0-initial-r
 - A instanciação de `CharacterSelection` e a entrega de seu controller não ficaram demonstradas na busca focada. `dialogPlaceholder` não comprova sozinho o ciclo de vida.
 - O [inventário de autenticação visual](phase0-authentication-ui-contracts.md) localizou `TwoFactorEMailTextEnterDialog.qml`, com entrada textual, confirmação, cancelamento e ação associada ao reenvio por e-mail. Sua criação e ligação ao login não foram demonstradas, nem a correspondência com o segundo fator efetivo do servidor. Diálogo existente não comprova fluxo completo; não criar frontend substituto.
 - **Inconsistência estática confirmada:** `Chat.qml:585–586` chama `chatInput.deslect()`, enquanto `ChatInput.qml:29–31` declara `deselect()`. O impacto não foi executado. Não há solução compatível demonstrada exclusivamente nos adaptadores permitidos. A implementação do caminho afetado fica bloqueada; não editar QML, injetar remendo de runtime nem substituir o componente para corrigir a grafia.
-- Nenhum provider `image://` foi identificado no recorte de login/seleção; isso não significa ausência global. A auditoria anterior identificou, por exemplo, o provider de cooldown da barra de ações. Imports `qrc:`, URLs dinâmicas e aliases continuam pendentes de inventário completo.
+- A inspeção transitiva posterior identificou `image://optimized1pixelborderimage/` em `Optimized1PixelBorderImage.qml`, consumido pelos botões; aliases não implementam esse provider. Também foram identificados `WheelArea` nos controles legados e dependências privadas dos efeitos. Ver [termo de encerramento](phase0-acceptance.md). Imports `qrc:`, URLs dinâmicas e aliases continuam pendentes de inventário completo.
 
 ## Matriz inicial de compatibilidade
 
@@ -220,12 +220,13 @@ O baseline selecionado `fa8cecf91d7f31a1715a7a6524f208897ffb33ce` continua sendo
 
 Fontes públicas consultadas: [baseline fixo](https://github.com/microsoft/vcpkg/blob/fa8cecf91d7f31a1715a7a6524f208897ffb33ce/versions/baseline.json), [ports nessa revisão](https://github.com/microsoft/vcpkg/tree/fa8cecf91d7f31a1715a7a6524f208897ffb33ce/ports), [triplet](https://github.com/microsoft/vcpkg/blob/fa8cecf91d7f31a1715a7a6524f208897ffb33ce/triplets/x64-windows.cmake), [Qt para Windows](https://doc.qt.io/qt-6/windows.html) e [requisitos WebEngine](https://doc.qt.io/qt-6/qtwebengine-platform-notes.html). As páginas Qt são móveis; os requisitos relatados correspondem à consulta desta rodada.
 
-## Pendências para o aceite
+## Encerramento documental e gates técnicos
 
-1. Rastreabilidade: responsável confirmou builds atuais e funcionamento. Identificação exata dos binários/revisões permanece para o registro de validação externa; não pedir novamente o resultado geral nem tratar a expressão “última versão” como hash verificado.
-2. Laboratório: sessão, e-mail/senha e endpoint HTTP confirmados acima. Falta endereço/porta TCP do jogo para a validação de conexão; não presumir a porta HTTP nem sondar serviços. 2FA foi adiado, não removido do servidor; seu canal deve ser confirmado quando esse recorte for implementado.
-3. Toolchain: seleção aprovada e ambiente inventariado; permanecem as verificações técnicas acima, especialmente Qt/WebEngine com MSVC 14.51, versão do Ninja e disponibilidade do baseline. Não exigir instalação antiga ou alteração do ambiente para cumprir a recomendação substituída. Ports/features documentados não equivalem a resolução executada.
-4. Recursos: documentar origem, disponibilidade e correspondência de sprites, metadados, traduções e IDs.
-5. Contratos: completar inventário transitivo e matriz do MVP. Manter o caminho de chat afetado bloqueado sem solução compatível demonstrada.
+O responsável solicitou finalizar a etapa e confirmou os dados restantes do laboratório. A entrega documental da Fase 0 está concluída com ressalvas, conforme [termo](phase0-acceptance.md); não equivale a compatibilidade comprovada ou inventário global completo.
 
-**Próxima etapa:** continuar o inventário estático de contratos e recursos, com a seleção de ferramentas já decidida. Eventual incompatibilidade deve ser documentada sem modificar o ambiente ou os originais. A aprovação não encerra o aceite da Fase 0 nem autoriza agentes a configurar ou executar projetos. A [Fase 1](phase1-bootstrap-transport.md) continua não iniciada.
+1. Laboratório: sessão, e-mail/senha, API HTTP, `localhost:7172` e executáveis nas últimas modificações confirmados por relato. HEADs reconferidos. Não repetir pedidos do resultado funcional geral; hashes de binários não foram medidos. 2FA continua proteção do servidor, com implementação adiada e falha explícita no incremento que não o suporta.
+2. Toolchain: seleção fixada, mas validação externa pendente para o aceite da Fase 1. Consulta local não resolveu o objeto Git do baseline selecionado; não houve fetch ou modificação do ambiente. Versão Ninja, resolução, ABI e build permanecem por validar pelo responsável/CI.
+3. Recursos: todas as 5.090 referências do catálogo existem. Aparências locais e do servidor diferem em tamanho/hash; correspondência semântica é gate da Fase 3. Traduções não localizadas; arquivos Verdana encontrados no Windows, sem prova de métricas/empacotamento. Ver [auditoria dos assets](phase0-assets-verification.md).
+4. Contratos: formato exato deve ser rastreado antes do enquadramento da Fase 1 e antes de cada mensagem nas fases seguintes. Completar APIs transitivas antes da integração visual da Fase 4. Manter caminho afetado do chat bloqueado na Fase 5 sem solução compatível demonstrada.
+
+**Próxima etapa:** bootstrap sem interface da [Fase 1](phase1-bootstrap-transport.md), ainda não iniciado. O fechamento documental não dispensa os gates de cada incremento e nunca autoriza agentes a configurar, compilar ou executar projetos.

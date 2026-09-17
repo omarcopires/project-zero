@@ -1,6 +1,6 @@
 # Fase 0 — Recursos da composição inicial e seleção
 
-Data: 2026-09-17. Inventário estático parcial, complementar à [auditoria geral](backend-resource-audit.md) e ao [relatório de contratos](phase0-contract-status.md). Não encerra a Fase 0 nem inicia a integração gráfica. Frontend, ambiente e instalações permanecem intactos.
+Data: 2026-09-17. Inventário estático parcial, complementar à [auditoria geral](backend-resource-audit.md) e ao [relatório de contratos](phase0-contract-status.md). O [termo](phase0-acceptance.md) registra o encerramento documental com ressalvas, sem integração gráfica iniciada. Atualização: sprites/metadados estão presentes em `assets/`; catálogo, hashes e diferenças frente ao servidor constam na [verificação posterior](phase0-assets-verification.md). Fontes Verdana foram encontradas no Windows, sem validação de métricas; traduções não localizadas. Frontend, ambiente e instalações permanecem intactos.
 
 ## Recorte e evidência
 
