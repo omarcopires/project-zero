@@ -4,8 +4,9 @@ Data: 2026-09-17. Estado: **em andamento; aceite não concluído**. Nenhuma impl
 
 ## Decisões desta rodada
 
-- O responsável selecionou **Qt 6 pelo vcpkg** como origem única para a proposta de toolchain. Não misturar com SDK Qt externo. Versão, módulos/features, baseline, triplet, runtime MSVC e condições de distribuição continuam pendentes; nada instalado ou resolvido.
-- O responsável autorizou inicialmente avaliar `E:\caverot-client` e depois escolheu **indicar outra referência licenciada**. URL pública e revisão dessa alternativa ainda não foram fornecidas. O cliente local permanece evidência funcional, não código aprovado para cópia ou adoção.
+- O responsável selecionou **Qt 6 pelo vcpkg** como origem única para a proposta de toolchain. Não misturar com SDK Qt externo. Versão, módulos/features, baseline, triplet e runtime MSVC continuam pendentes; nada instalado ou resolvido.
+- O responsável esclareceu que `E:\caverot-client` é seu cliente, modificado e mantido por ele ao longo dos anos. Ele é a **referência funcional e de contratos** desta etapa; não é necessário indicar outra URL. Isso não implica adoção do motor antigo: Clean Architecture e nomes sem marca continuam obrigatórios.
+- O projeto novo é **fechado, com acesso restrito ao responsável**. Uma eventual abertura ou publicação será decidida por ele no futuro, fora do escopo atual. O frontend protegido permanece integralmente preservado.
 - O responsável confirmou que o cliente local compila com as alterações C++ atuais, apresenta seleção de personagens e permite login e jogo normal no servidor 15.25, sem problemas relevantes observados. É **validação manual relatada pelo responsável**, não execução do agente nem garantia de ausência de defeitos. Falta vincular o relato às revisões/builds exatas utilizadas.
 - O responsável autorizou continuidade automática das etapas e commits das entregas revisadas, respeitando todas as restrições. A progressão deve parar quando depender de informação ou ação sua; não há autorização para push ou execução de projetos.
 
@@ -60,7 +61,7 @@ Caminhos relativos a `E:\caverot-client`, HEAD `02e0ae82693cbb7036983329d0324615
 - O ramo examinado de cancelamento HTTP não demonstrou cancelamento da operação ou invalidação da resposta tardia. O backend novo precisa definir isso e escrever testes determinísticos; não se trata de defeito reproduzido na referência.
 - `src/framework/http/session.cpp:24–32` desabilita verificação de certificado no ramo HTTPS examinado. **Não reproduzir essa configuração**: HTTPS no backend novo deve verificar cadeia de confiança e identidade do servidor. O funcionamento relatado não comprova segurança desse transporte.
 - Inicialização de versão, retomada completa da fila de espera, revogação/renovação de sessão e destinos efetivos continuam sem fechamento neste recorte. Não foi aberta configuração ativa para suprir essas lacunas.
-- Nenhum pacote binário, implementação ou conteúdo sensível foi copiado. A observação de contratos e o relato funcional não resolvem licenças nem comprovam compatibilidade do frontend QML deste workspace.
+- Nenhum pacote binário, implementação ou conteúdo sensível foi copiado. A observação de contratos e o relato funcional não comprovam compatibilidade do frontend QML deste workspace.
 
 ## Inventário inicial de contratos QML
 
@@ -110,11 +111,7 @@ Nenhuma fixture foi criada. Critérios abaixo são futuros, para responsável/CI
 
 O `CMakeLists.txt` examinado declara CMake mínimo 3.22, C++20 e dependências gráficas diferentes de Qt. O `vcpkg.json` inclui spdlog e baseline `9e593bb18ea69cc5095e012465dcd675a822ed0d`. Esses valores são **evidência do candidato, não escolhas do projeto novo**; não copiar manifesto, nomes, runtime ou arquitetura.
 
-Não foi encontrado arquivo regular `LICENSE*`, `COPYING*` ou `NOTICE*` na raiz e nas listagens selecionadas de fontes/documentação. Isso não demonstra ausência de licença em todo o repositório, histórico ou upstream. Trechos iniciais de headers de jogo/protocolo/transporte examinados também não estabeleceram licença.
-
-`docs/README.md:25–26` e `docs/otcv8-performance-roadmap.md:1–7` indicam relação com OTCv8, mas não comprovam upstream exato nem revisão de origem. A licença do motor e das modificações continua sem comprovação; licenças de dependências não resolvem essa lacuna. A documentação local de sons descreve origem de recursos, não autorização de redistribuição.
-
-O responsável escolheu indicar **outra referência licenciada**. A aprovação dessa referência aguarda URL pública e revisão, quando disponível. Não presumir a licença pelo nome do fork; não consultar URLs de remotes potencialmente autenticadas por conveniência. A leitura estática já realizada não equivale à aprovação de cópia ou redistribuição.
+O responsável confirmou que mantém esse cliente ao longo dos anos. A revisão observada fica registrada como referência para comparar contratos, sem importar sua arquitetura para o núcleo novo.
 
 ### Qt pelo vcpkg
 
@@ -123,15 +120,13 @@ O responsável escolheu indicar **outra referência licenciada**. A aprovação 
 - Avaliar separadamente módulos presentes no pacote e módulos realmente exigidos pelo recorte; presença de descritores WebEngine/WebChannel não prova que sejam necessários no bootstrap headless.
 - Fixar C++, MSVC, CMake, triplet e vinculação/runtime coerentes com Qt e dependências. Preservar `.clang-format`. Definir versão de spdlog por baseline e reproduzir o [contrato de logging](coding-standards.md#contrato-obrigatório-do-backend-novo).
 - A consulta de disponibilidade no PATH não encontrou `cmake`, `cl`, `vcpkg`, `qmake` ou `qtpaths` na sessão inspecionada. Isso **não comprova ausência de instalações** fora desse ambiente. Nenhuma ferramenta foi executada para obter versão.
-- Licenças de módulos Qt, dependências, fontes, traduções e sprites exigem levantamento separado. A origem vcpkg não concede automaticamente direitos de redistribuição.
 
 ## Pendências para o aceite
 
 1. Responsável: vincular a confirmação já fornecida de compilação, seleção, login e jogo às builds/revisões exatas utilizadas. Não anexar logs reais, senhas, tokens ou dumps; não é necessário repetir o resultado geral já relatado.
 2. Responsável: confirmar modo de autenticação e endpoints de laboratório sem dados sensíveis; documentar as condições da confirmação manual.
-3. Referência: aguardar URL pública da alternativa licenciada escolhida pelo responsável, com revisão se disponível; verificar licença e capacidades antes da seleção definitiva.
-4. Toolchain: selecionar versões, baseline, módulos/features e triplet para Qt pelo vcpkg, após avaliar compatibilidade dos contratos legados. A análise desta rodada não fechou uma proposta de versões.
-5. Recursos: documentar autorização, procedência e correspondência de sprites, metadados, traduções e IDs; definir licença do código novo.
-6. Contratos: completar inventário transitivo e matriz do MVP. Manter o caminho de chat afetado bloqueado sem solução compatível demonstrada.
+3. Toolchain: selecionar versões, baseline, módulos/features e triplet para Qt pelo vcpkg, após avaliar compatibilidade dos contratos legados. A proposta de versões permanece pendente.
+4. Recursos: documentar origem, disponibilidade e correspondência de sprites, metadados, traduções e IDs.
+5. Contratos: completar inventário transitivo e matriz do MVP. Manter o caminho de chat afetado bloqueado sem solução compatível demonstrada.
 
-**Parada desta rodada:** aguardando a URL pública da nova referência que o responsável optou por indicar. O levantamento parcial será commitado conforme autorização, sem declarar aceite da Fase 0. Depois da informação, verificar procedência/licença e compatibilidade e retomar a proposta de toolchain. A [Fase 1](phase1-bootstrap-transport.md) continua não iniciada.
+**Próxima etapa:** elaborar a proposta formal de toolchain (versões, baseline, triplet e features), sem aguardar outra referência externa. Sua seleção não autoriza agentes a configurar ou executar projetos. A [Fase 1](phase1-bootstrap-transport.md) continua não iniciada.

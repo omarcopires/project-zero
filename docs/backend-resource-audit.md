@@ -86,7 +86,7 @@ A solução deverá usar manifestos/aliases e registro de serviços em arquivos 
 - Manter todas as árvores originais, inclusive recursos de terceiros e arquivos ainda não compreendidos.
 - Inventariar tipos, propriedades, métodos, sinais, roles, image providers e recursos antes de integrar uma tela.
 - Corrigir incompatibilidades no motor novo; não converter QML para OTUI nem simplificar componentes existentes.
-- Confirmar sprites, metadados, traduções, Qt e licenças como requisitos próprios; a disponibilidade de uma interface não resolve essas dependências.
+- Confirmar sprites, metadados, traduções e Qt como requisitos próprios; a disponibilidade de uma interface não resolve essas dependências.
 - A inspeção não demonstra capacidade de execução, fidelidade de renderização ou compatibilidade 15.25.
 
 Durante a tarefa documental foram registrados hashes SHA-256 de 4.509 arquivos originais, incluindo `.clang-format`, para comparação final. A comparação limita-se ao intervalo da tarefa; não certifica a procedência anterior nem impede alterações futuras. Build, testes e execução do cliente/servidor não fazem parte desta auditoria.

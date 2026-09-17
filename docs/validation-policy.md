@@ -37,7 +37,7 @@ A implementação futura deverá separar:
 4. **Ponta a ponta e visual:** frontend original inalterado, fluxos reais, DPI, coordenadas de entrada, desconexão e limpeza de estado.
 5. **Desempenho:** cenários reproduzíveis, máquina/backend/versão registrados, correção funcional verificada separadamente.
 
-CTest será o orquestrador proposto. CI Windows será planejada desde a fase 1, mas não existe como resultado desta tarefa. Sua criação/execução precisa respeitar licenças, isolamento de segredos e esta política. Agentes podem escrever configuração quando solicitados, mas não disparar pipelines.
+CTest será o orquestrador proposto. CI Windows será planejada desde a fase 1, mas não existe como resultado desta tarefa. Sua criação/execução precisa respeitar o isolamento de segredos e esta política. Agentes podem escrever configuração quando solicitados, mas não disparar pipelines.
 
 ## Encerramento de tarefas
 

@@ -12,7 +12,7 @@ Esta fase só inicia após a Fase 0 entregar:
 
 - contrato 15.25 confirmado (perfil Current, capacidades e revisão do servidor);
 - fluxo de autenticação documentado (HTTP/sessão como candidato, sujeito à configuração efetiva);
-- fork/commit/licença do OTClient de referência registrados;
+- cliente de referência e revisão inspecionada registrados;
 - versões fixadas: Qt, C++, MSVC, CMake, vcpkg/baseline, triplet;
 - origem única de Qt: **ports vcpkg**, conforme decisão do responsável; módulos/features e ABI ainda precisam ser fixados;
 - matriz de compatibilidade e inventário inicial de contratos do frontend.
@@ -131,7 +131,7 @@ Todo backend segue [Clean Architecture e Clean Code](coding-standards.md), com n
 
 Gerador, biblioteca de rede, frameworks de teste e formato de configuração ainda são propostas. Nomes descritivos sem marca, spdlog, Clean Architecture/Clean Code e enums separados são regras confirmadas. Os prompts devem conferir o contrato da Fase 0 antes de implementar cada recorte; ausência de evidência bloqueia apenas o recorte dependente, sem inventar valores.
 
-1. **Entrada:** responsável registra revisão do servidor, toolchain, licença da referência e contratos necessários. Estado atual: pendente; leitura estática não encerra a Fase 0.
+1. **Entrada:** registrar revisões do servidor e do cliente de referência, toolchain e contratos necessários. As revisões inspecionadas constam no relatório da Fase 0; toolchain e contratos ainda estão pendentes. Leitura estática não encerra a fase.
 2. **Bootstrap:** alvos core, transporte, enquadramento, diagnóstico e testes separados por responsabilidade. Configurar dependências por alvo; manter core livre de sockets/QML. Definir a abstração mínima de logging aqui, sem framework genérico desnecessário.
 3. **Enquadramento e testes puros:** registrar evidência de campo/ordem de bytes/limite antes de codificar; construir fixtures sintéticas locais. Nunca inferir criptografia, compressão ou integridade a partir do número 15.25; camadas ainda desconhecidas permanecem bloqueadas.
 4. **Transporte e testes de lifecycle:** integrar enquadramento por composição no diagnóstico, sem obrigar o socket a interpretar frames. Documentar ownership, afinidade de thread e entrega dos eventos.

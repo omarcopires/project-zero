@@ -15,7 +15,7 @@ Data: 2026-09-17. Estado: plano-base aprovado; implementação não iniciada. Es
 - OTClient apenas como referência; não adotar seu núcleo ou sua arquitetura Lua/OTUI.
 - Conexão e sessão antes da integração visual completa.
 - MVP: login, seleção de personagem, mapa, movimento, chat, inventário e combate básico.
-- Intenção de publicação open source. O responsável declarou autorização para os recursos atuais; condições e abrangência de redistribuição ainda devem ser documentadas.
+- Projeto fechado, com acesso restrito ao responsável. Uma eventual abertura ou publicação será decidida por ele no futuro, fora do escopo atual.
 - Nenhum prazo prometido antes de fechar referências, recursos, equipe e disponibilidade.
 
 ### Regra central: frontend original imutável
@@ -60,17 +60,15 @@ A quantidade de imagens não demonstra a presença de sprites de mundo compatív
 
 ### Decisões ainda abertas
 
-Progresso da Fase 0, evidências e bloqueios: [relatório parcial](phase0-contract-status.md). O responsável escolheu Qt pelo vcpkg, confirmou o funcionamento do cliente local e optou por indicar outra referência licenciada; isso não encerra a fase.
+Progresso da Fase 0, evidências e bloqueios: [relatório parcial](phase0-contract-status.md). O responsável escolheu Qt pelo vcpkg e confirmou o funcionamento de `E:\caverot-client`, cliente que mantém ao longo dos anos e referência funcional desta etapa. A revisão inspecionada está registrada; não se aguarda outra URL nem se adota o motor antigo.
 
-1. Fork, URL, licença e revisão OTClient de referência. A alternativa licenciada escolhida pelo responsável aguarda URL pública. `E:\caverot-client` permanece evidência funcional, não código aprovado para cópia ou adoção.
-2. Configuração efetiva de autenticação e capacidades do servidor 15.25. Compilação, seleção, login e jogo normais foram confirmados pelo responsável; falta vincular o relato às builds/revisões exatas utilizadas, não repetir o resultado geral.
-3. Versão C++, Qt, MSVC, CMake, vcpkg/baseline, triplet e backend gráfico.
-4. Origem única de Qt decidida: **ports vcpkg**. Cobertura de módulos/features e compatibilidade de ABI permanecem pendentes; não misturar com SDK externo.
-5. Pacote autorizado de sprites, traduções, metadados e correspondência de IDs.
-6. Texto e alcance das autorizações e licença de distribuição do código novo.
-7. Equipe, disponibilidade, orçamento de desempenho e ambiente de referência.
+1. Configuração efetiva de autenticação e capacidades do servidor 15.25. Compilação, seleção, login e jogo normais foram confirmados pelo responsável; falta vincular o relato às builds/revisões exatas utilizadas, não repetir o resultado geral.
+2. Versão C++, Qt, MSVC, CMake, vcpkg/baseline, triplet e backend gráfico.
+3. Origem única de Qt decidida: **ports vcpkg**. Cobertura de módulos/features e compatibilidade de ABI permanecem pendentes; não misturar com SDK externo.
+4. Disponibilidade de sprites, traduções, metadados e correspondência de IDs.
+5. Equipe, disponibilidade, orçamento de desempenho e ambiente de referência.
 
-Se um recurso não tiver direitos comprovados, a publicação desse recurso fica bloqueada. Não usar essa pendência como justificativa para substituir ou alterar o frontend protegido.
+A ausência de um recurso deve ser registrada como bloqueio técnico, nunca usada como justificativa para substituir ou alterar o frontend protegido.
 
 ## 3. Arquitetura
 
@@ -95,19 +93,19 @@ A fronteira gráfica proposta é um item integrado ao Qt Quick, compatível com 
 
 **Todos os critérios executáveis abaixo são validações futuras do responsável ou CI previamente configurada. Não são autorização para agentes executarem build, cliente, servidor ou testes.** Ver [política](validation-policy.md).
 
-### Fase 0 — Contrato, recursos e licenças
+### Fase 0 — Contrato, recursos e toolchain
 
 **Dependências:** nenhuma implementação prévia.
 
 - Confirmar revisão, perfil Current 15.25 e capacidades do servidor, sem abrir segredos.
 - Documentar fluxo real de autenticação, endpoints de laboratório e dados de teste.
-- Fixar referência OTClient e licença; não presumir que qualquer fork suporte o contrato.
+- Registrar revisão e capacidades da referência funcional; não presumir que qualquer fork suporte o contrato.
 - Produzir matriz: funcionalidade, evidência no servidor, referência, fixture, contrato QML e critério de aceite.
 - Inventariar tipos nativos, controllers, propriedades, métodos, sinais, roles, providers e aliases exigidos pelo recorte inicial.
-- Verificar procedência e autorização de QMLs, imagens, fontes, sprites, traduções e código de terceiros.
+- Verificar disponibilidade, formato e correspondência dos QMLs, imagens, fontes, sprites e traduções.
 - Fixar toolchain, formato de assets e origem de Qt, preservando `.clang-format` e originais.
 
-**Entrega:** contrato 15.25, matriz de compatibilidade, inventário de recursos/integração e decisões de toolchain/licenças.
+**Entrega:** contrato 15.25, matriz de compatibilidade, inventário de recursos/integração e decisões de toolchain.
 
 **Aceite:** ambiente e contrato documentados; reprodução real do servidor confirmada pelo responsável; bloqueios de recursos explicitados. A leitura já realizada não encerra sozinha esta fase.
 
@@ -176,18 +174,18 @@ Para cada incremento: evidência no servidor → eventos/domínio → adaptador 
 
 **Aceite externo:** dois clientes de teste demonstram movimento observado, chat, itens e combate com estados consistentes. Recursos fora do MVP não são implementados silenciosamente como sucesso; limitações ficam explícitas no host/contrato e na documentação, sem alterar telas originais.
 
-### Fase 6 — Estabilização e publicação
+### Fase 6 — Estabilização e empacotamento privado
 
 **Depende de:** fase 5; planejamento de automação começa na fase 1.
 
 - Build/testes automatizados Windows e empacotamento Qt, acionados externamente ao agente.
 - Sessões prolongadas, interrupção de rede, cancelamento, limpeza de estado e consumo de memória.
 - Medir desempenho em máquina/cena/backend definidos; fixar metas após baseline.
-- Incluir avisos de licença, atribuições e instruções de ambiente de teste.
+- Incluir instruções de ambiente de teste.
 - Validar instalação em máquina limpa sem depender de uma instalação do cliente original.
-- Conferir que originais distribuídos correspondem aos aprovados e que todos os direitos estão documentados.
+- Conferir que os originais empacotados correspondem byte a byte aos aprovados.
 
-**Aceite externo:** release reproduzível, testes documentados, recursos redistribuíveis verificados, limitações publicadas e fidelidade/estabilidade demonstradas nos cenários definidos.
+**Aceite externo:** pacote privado reproduzível, testes e limitações documentados, recursos íntegros e fidelidade/estabilidade demonstradas nos cenários definidos. Publicação não faz parte deste marco.
 
 ## 5. Estratégia de testes e engenharia
 
@@ -231,7 +229,6 @@ Não criar uma árvore `client/qml/` para reimplementar ou substituir o frontend
 | Sprites/traduções/aliases incompletos | Bloqueio explícito, inventário e metadados autorizados |
 | Mistura de runtimes/ABIs Qt | Origem e versões únicas, validação externa |
 | Corridas de thread e lifecycle | Ownership, eventos tipados e sincronização testáveis |
-| Licença insuficiente para distribuição | Não publicar até comprovação, sem alterar originais |
 | Regras confundidas com bloqueio técnico | Revisão e hashes; não alegar proteção automática |
 
 Fora do MVP: versões antigas/futuras, serviços oficiais, loja/pagamentos, criação web de contas, atualizador automático, todos os sistemas avançados (Forge/Prey/Bosstiary etc.) e multiplataforma. Os componentes dessas funcionalidades permanecem preservados, mesmo sem implementação correspondente no MVP.
