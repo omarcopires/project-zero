@@ -1,0 +1,10 @@
+module qmlcomponents
+linktarget qmlcomponentsplugin
+optional plugin qmlcomponentsplugin
+classname qmlcomponentsPlugin
+typeinfo qmlcomponents.qmltypes
+optional import qmlcomponents.qml
+default import qmlcomponents.qml
+prefer :/qt/qml/qmlcomponents/
+depends QtQuick
+
