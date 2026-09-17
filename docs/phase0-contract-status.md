@@ -4,7 +4,8 @@ Data: 2026-09-17. Estado: **em andamento; aceite não concluído**. Nenhuma impl
 
 ## Decisões desta rodada
 
-- O responsável selecionou **Qt 6 pelo vcpkg** como origem única para a proposta de toolchain. Não misturar com SDK Qt externo. Versão, módulos/features, baseline, triplet e runtime MSVC continuam pendentes; nada instalado ou resolvido.
+- O responsável selecionou **Qt 6 pelo vcpkg** como origem única e aprovou a proposta em 2026-09-17. Após o inventário local, determinou usar as ferramentas modernas disponíveis **sem modificar seu ambiente**: Visual Studio 2026 e MSVC 14.51.36231 substituem a recomendação anterior de MSVC 2022/v143. Mantêm-se C++20, Qt 6.11.1, baseline fixo, ports/features descritos, `x64-windows` dinâmico e Qt Network. Não misturar com SDK Qt externo. Aprovação da seleção não equivale a compatibilidade ou validação executável.
+- Preservar a instalação do Visual Studio, `D:\vcpkg`, SDKs, PATH e variáveis do ambiente. Não instalar toolset antigo, atualizar ou trocar o checkout compartilhado, executar bootstrap nem instalar dependências. Preferir ferramentas modernas não significa seguir `latest`/`master` móveis ou habilitar recursos experimentais automaticamente; registrar versões explícitas para reprodução.
 - O responsável esclareceu que `E:\caverot-client` é seu cliente, modificado e mantido por ele ao longo dos anos. Ele é a **referência funcional e de contratos** desta etapa; não é necessário indicar outra URL. Isso não implica adoção do motor antigo: Clean Architecture e nomes sem marca continuam obrigatórios.
 - O projeto novo é **fechado, com acesso restrito ao responsável**. Uma eventual abertura ou publicação será decidida por ele no futuro, fora do escopo atual. O frontend protegido permanece integralmente preservado.
 - O responsável confirmou que o cliente local compila com as alterações C++ atuais, apresenta seleção de personagens e permite login e jogo normal no servidor 15.25, sem problemas relevantes observados. É **validação manual relatada pelo responsável**, não execução do agente nem garantia de ausência de defeitos. Falta vincular o relato às revisões/builds exatas utilizadas.
@@ -115,15 +116,15 @@ O responsável confirmou que mantém esse cliente ao longo dos anos. A revisão 
 
 ### Qt pelo vcpkg
 
-- Escolha de origem confirmada; versão Qt e baseline ainda não selecionadas.
+- Origem, versão Qt e baseline selecionados pela aprovação da proposta abaixo; resolução e compatibilidade ainda não validadas.
 - Levantar cobertura de Qt Quick, QML, Controls, Layouts, Qt5Compat/GraphicalEffects e módulos transitivos declarados nos descritores, sem presumir equivalência para `LegacyControls` ou plugins do jogo.
 - Avaliar separadamente módulos presentes no pacote e módulos realmente exigidos pelo recorte; presença de descritores WebEngine/WebChannel não prova que sejam necessários no bootstrap headless.
 - Fixar C++, MSVC, CMake, triplet e vinculação/runtime coerentes com Qt e dependências. Preservar `.clang-format`. Definir versão de spdlog por baseline e reproduzir o [contrato de logging](coding-standards.md#contrato-obrigatório-do-backend-novo).
 - A consulta de disponibilidade no PATH não encontrou `cmake`, `cl`, `vcpkg`, `qmake` ou `qtpaths` na sessão inspecionada. Isso **não comprova ausência de instalações** fora desse ambiente. Nenhuma ferramenta foi executada para obter versão.
 
-### Recomendação de toolchain — proposta para aprovação
+### Seleção de toolchain — proposta aprovada
 
-Consulta estática de 2026-09-17. Esta seção recomenda uma combinação para avaliação; **não declara dependências instaladas, resolução executada ou compatibilidade comprovada**. Nenhum manifesto, preset ou código foi criado. A consulta pública de metadados não envolveu conexão ao servidor do jogo.
+Consulta estática e aprovação do responsável em 2026-09-17. A combinação abaixo foi aprovada para adoção; **não declara dependências instaladas, resolução executada ou compatibilidade comprovada**. Os termos candidato/recomendação nas tabelas preservam a distinção entre seleção e validação técnica. Nenhum manifesto, preset ou código foi criado. A consulta pública de metadados não envolveu conexão ao servidor do jogo.
 
 | Decisão | Recomendação | Fundamentação / limite |
 |---|---|---|
@@ -132,8 +133,10 @@ Consulta estática de 2026-09-17. Esta seção recomenda uma combinação para a
 | Revisão vcpkg candidata | `fa8cecf91d7f31a1715a7a6524f208897ffb33ce` | Manifests, baseline e triplet consultados nessa revisão imutável; não usar `master` móvel no projeto |
 | Qt candidato | 6.11.1 | Versões dos ports e do baseline conferidas; adequação aos recursos privados do frontend ainda não demonstrada |
 | Plataforma/triplet | Windows x64, `x64-windows` | Triplet declara bibliotecas e CRT dinâmicos; WebEngine dessa revisão exige Windows x64 e `!static` |
-| Compilador | Família MSVC 2022/v143 | Matriz Qt 6.11 consultada lista MSVC 2022; patch exato do toolset depende do inventário local. Não herdar v145 por suposição |
-| Gerador | Ninja, configurações Debug/Release separadas | Coerente com a proposta da Fase 1; versões exatas de CMake/Ninja ainda precisam ser registradas |
+| Compilador | Visual Studio Community 2026, MSVC 14.51.36231 | Seleção explícita do responsável após inventário; não exigir MSVC 2022/v143. A matriz Qt 6.11 consultada lista MSVC 2022, portanto não comprova suporte a esta combinação |
+| CMake | 4.3.1-msvc1 fornecido pelo Visual Studio | Versão lida nos metadados do arquivo, sem execução; compatibilidade com ports ainda não validada |
+| Gerador | Ninja fornecido pelo Visual Studio, Debug/Release separados | Executável localizado; metadados de versão vazios. Não substituir nem baixar outro Ninja |
+| Windows SDK | 10.0.26100.0 disponível localmente | Diretório de headers identificado; não comprova completude da instalação ou sucesso de build |
 | Transporte | Qt Network no adaptador; `QCoreApplication` na composição | Evita uma segunda biblioteca de I/O; domínio/casos de uso permanecem sem Qt, sockets ou spdlog |
 | Testes | GoogleTest no núcleo; Qt Test na integração de adaptadores | Execução exclusivamente pelo responsável/CI; Qt Quick Test somente na integração visual posterior |
 | Renderização | Adiar seleção do backend gráfico até mapear `RenderDriver` e tipos nativos | Não inferir OpenGL, D3D ou compatibilidade a partir dos imports |
@@ -180,12 +183,29 @@ Os recursos embutidos também importam `QtQuick.Controls.impl` e implementaçõe
 
 Se a avaliação externa demonstrar incompatibilidade de Qt 6.11.1 com esses contratos, reavaliar a versão candidata ou a adaptação permitida; **não atualizar, remendar ou substituir os recursos protegidos para encaixar no SDK**. A escolha mais recente disponível não é automaticamente a escolha compatível.
 
-#### Pendências específicas da proposta
+#### Ambiente existente — inventário estático
 
-- Aprovação da combinação candidata; revisão exata de MSVC, Windows SDK, CMake e Ninja ainda não fixada. A presença de `vswhere.exe` foi observada, mas o inventário de instalações não foi executado; nenhuma ferramenta foi instalada ou iniciada para obter versões.
-- A documentação WebEngine consultada exige compilador C++20 e, no Windows, SDK pelo menos `10.0.26100.0`; lista MSVC 14.36 como mínimo para VS 2022. São mínimos publicados, não prova de suficiência para esse port ou identificação do ambiente local.
-- Fixar as ferramentas host requeridas pelo port e os caminhos de execução externamente; Qt pelo vcpkg pode compilar dependências. Nenhuma instalação fica autorizada ao agente por esta proposta.
-- Validar externamente resolução, ABI, plugins, TLS e empacotamento. Integração QML e fidelidade visual permanecem validações posteriores, sem aceite presumido.
+Inventário realizado em 2026-09-17 com consulta ao instalador por `vswhere`, metadados de arquivos, diretórios, registro do SDK e leitura Git/JSON. Não foram executados compiladores, CMake, Ninja, vcpkg ou scripts do projeto.
+
+| Item | Evidência local |
+|---|---|
+| Visual Studio | Community 2026, instalação `18.10.12210.168`, marcada completa pelo instalador, em `D:\Microsoft Visual Studio\18\Community` |
+| MSVC | Diretório `VC\Tools\MSVC\14.51.36231` nessa instalação; nenhum v143 encontrado no recorte consultado |
+| CMake | `Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe`, relativo ao Visual Studio; metadados `4.3.1-msvc1` |
+| Ninja | `Common7\IDE\CommonExtensions\Microsoft\CMake\Ninja\ninja.exe`, relativo ao Visual Studio; versão não identificada pelos metadados |
+| Windows SDK | Raiz registrada `D:\Windows Kits\10\`, diretório `Include\10.0.26100.0` |
+| vcpkg | `D:\vcpkg\vcpkg.exe` presente; HEAD local `127402f1c75bb3d5ff6bce04b285faa4930a5aca` |
+| Baseline local | `qtbase` 6.11.1#1, diferente de 6.11.1#2 no baseline selecionado; os outros seis ports da tabela têm as mesmas versões/revisões. Nenhuma mudança Git nos dois caminhos consultados: `versions/baseline.json` e `triplets/x64-windows.cmake` |
+| PATH da sessão | `vcpkg`, `cmake`, `ninja` e `cl` não localizados; isso não invalida os arquivos encontrados nem autoriza alterar o PATH |
+
+O baseline selecionado `fa8cecf91d7f31a1715a7a6524f208897ffb33ce` continua sendo a referência documental das dependências. Ele não é o HEAD local e não foi aplicado a `D:\vcpkg`. Um futuro manifesto pode especificar baseline distinto do checkout, mas disponibilidade dos objetos Git e resolução não foram verificadas; não executar fetch, checkout ou instalação para suprir essa lacuna. Nenhum pacote instalado foi inventariado ou presumido a partir do baseline.
+
+#### Pendências técnicas após aprovação
+
+- Avaliar externamente Qt/ports com MSVC 14.51.36231 e CMake 4.3.1-msvc1. Ausência dessa combinação na matriz consultada não prova incompatibilidade, mas também não permite declarar suporte verificado. Não voltar automaticamente a v143 nem exigir mudança do ambiente.
+- A documentação WebEngine consultada exige compilador C++20 e SDK pelo menos `10.0.26100.0`; os mínimos publicados para VS 2022 não certificam VS 2026. C++20 permanece o padrão aprovado, independentemente da versão mais nova do compilador.
+- Registrar a versão do Ninja e verificar disponibilidade das ferramentas host e do baseline na futura validação pelo responsável/CI. Se algo faltar, registrar o bloqueio sem instalar ou alterar o ambiente.
+- Validar externamente resolução, ABI, plugins, TLS e empacotamento. Integração QML e fidelidade visual permanecem validações posteriores, sem aceite presumido. A seleção aprovada não autoriza agentes a configurar, compilar ou executar projetos.
 
 Fontes públicas consultadas: [baseline fixo](https://github.com/microsoft/vcpkg/blob/fa8cecf91d7f31a1715a7a6524f208897ffb33ce/versions/baseline.json), [ports nessa revisão](https://github.com/microsoft/vcpkg/tree/fa8cecf91d7f31a1715a7a6524f208897ffb33ce/ports), [triplet](https://github.com/microsoft/vcpkg/blob/fa8cecf91d7f31a1715a7a6524f208897ffb33ce/triplets/x64-windows.cmake), [Qt para Windows](https://doc.qt.io/qt-6/windows.html) e [requisitos WebEngine](https://doc.qt.io/qt-6/qtwebengine-platform-notes.html). As páginas Qt são móveis; os requisitos relatados correspondem à consulta desta rodada.
 
@@ -193,8 +213,8 @@ Fontes públicas consultadas: [baseline fixo](https://github.com/microsoft/vcpkg
 
 1. Responsável: vincular a confirmação já fornecida de compilação, seleção, login e jogo às builds/revisões exatas utilizadas. Não anexar logs reais, senhas, tokens ou dumps; não é necessário repetir o resultado geral já relatado.
 2. Responsável: confirmar modo de autenticação e endpoints de laboratório sem dados sensíveis; documentar as condições da confirmação manual.
-3. Toolchain: aprovar ou ajustar a proposta acima e registrar versões exatas das ferramentas locais; avaliar compatibilidade dos contratos legados antes do aceite visual. Ports/features documentados não equivalem a resolução executada.
+3. Toolchain: seleção aprovada e ambiente inventariado; permanecem as verificações técnicas acima, especialmente Qt/WebEngine com MSVC 14.51, versão do Ninja e disponibilidade do baseline. Não exigir instalação antiga ou alteração do ambiente para cumprir a recomendação substituída. Ports/features documentados não equivalem a resolução executada.
 4. Recursos: documentar origem, disponibilidade e correspondência de sprites, metadados, traduções e IDs.
 5. Contratos: completar inventário transitivo e matriz do MVP. Manter o caminho de chat afetado bloqueado sem solução compatível demonstrada.
 
-**Próxima etapa:** decisão do responsável sobre a toolchain candidata e identificação das ferramentas disponíveis, sem aguardar outra referência externa. O inventário estático de contratos pode continuar em paralelo. A seleção não autoriza agentes a configurar ou executar projetos. A [Fase 1](phase1-bootstrap-transport.md) continua não iniciada.
+**Próxima etapa:** continuar o inventário estático de contratos e recursos, com a seleção de ferramentas já decidida. Eventual incompatibilidade deve ser documentada sem modificar o ambiente ou os originais. A aprovação não encerra o aceite da Fase 0 nem autoriza agentes a configurar ou executar projetos. A [Fase 1](phase1-bootstrap-transport.md) continua não iniciada.
