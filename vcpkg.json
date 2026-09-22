@@ -3,6 +3,7 @@
   "version-string": "0.1.0",
   "builtin-baseline": "fa8cecf91d7f31a1715a7a6524f208897ffb33ce",
   "dependencies": [
+    "fmt",
     {
       "name": "qtbase",
       "default-features": false,
