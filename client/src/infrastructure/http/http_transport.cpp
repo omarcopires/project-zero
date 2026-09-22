@@ -105,12 +105,12 @@ namespace infrastructure::http {
 			return;
 		}
 
-		if (m_reply->error() != QNetworkReply::NoError) {
+		const auto statusCode = m_reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+		if (m_reply->error() != QNetworkReply::NoError && statusCode == 0) {
 			fail(HttpError::NetworkFailure, QStringLiteral("HTTP network operation failed"));
 			return;
 		}
 
-		const auto statusCode = m_reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
 		auto responseBody = std::exchange(m_responseBuffer, QByteArray {});
 		m_terminalEventEmitted = true;
 		disposeReply();

@@ -92,4 +92,36 @@ function(project_add_tests)
             COMMAND http_integration_tests "${test_case}"
         )
     endforeach()
+
+    add_executable(
+        authentication_integration_tests
+        "${PROJECT_SOURCE_DIR}/client/tests/authentication_service_test.cpp"
+    )
+    target_link_libraries(
+        authentication_integration_tests
+        PRIVATE
+            authentication_application
+            Qt6::Core
+            Qt6::Network
+            Qt6::Test
+    )
+    project_apply_cpp_options(authentication_integration_tests)
+    set_target_properties(authentication_integration_tests PROPERTIES AUTOMOC ON)
+
+    foreach(
+        test_case
+        IN ITEMS
+            authenticatesSyntheticSession
+            classifiesRejectedCredentials
+            stopsAtUnsupportedChallenge
+            rejectsIncompatibleResponse
+            reportsTimeout
+            cancelsActiveRequest
+            rejectsConcurrentAttempt
+    )
+        add_test(
+            NAME "authentication_integration.${test_case}"
+            COMMAND authentication_integration_tests "${test_case}"
+        )
+    endforeach()
 endfunction()

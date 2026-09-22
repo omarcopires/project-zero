@@ -78,6 +78,20 @@ function(project_add_targets)
     set_target_properties(http_transport PROPERTIES AUTOMOC ON)
 
     add_library(
+        authentication_application
+        STATIC
+            "${PROJECT_SOURCE_DIR}/client/src/application/authentication/authentication_service.cpp"
+    )
+    target_include_directories(
+        authentication_application
+        PUBLIC
+            "${PROJECT_SOURCE_DIR}/client/src"
+    )
+    target_link_libraries(authentication_application PUBLIC session Qt6::Core PRIVATE core http_transport)
+    project_apply_cpp_options(authentication_application)
+    set_target_properties(authentication_application PROPERTIES AUTOMOC ON)
+
+    add_library(
         logging
         STATIC
             "${PROJECT_SOURCE_DIR}/client/src/infrastructure/logging/logger.cpp"

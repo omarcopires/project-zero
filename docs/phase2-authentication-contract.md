@@ -15,3 +15,9 @@ Validação externa de 2026-09-22: após a correção de uma asserção que aind
 A máquina de estados interna usa identificadores monotônicos e permite uma única tentativa ativa. Cancelamento encerra a tentativa corrente; qualquer resposta posterior ou pertencente a identificador anterior é ignorada. Uma nova tentativa limpa sessão e falha anteriores. Sucesso, credencial rejeitada, desafio não suportado, resposta incompatível, timeout e falha de transporte permanecem resultados distintos. O núcleo não depende de Qt, sockets ou logging e não armazena credenciais.
 
 Validação externa de 2026-09-22: o responsável informou `100% tests passed, 0 tests failed out of 60`. Os nove testes adicionais cobrem IDs monotônicos, concorrência, sucesso, credencial rejeitada, desafio não suportado, resposta incompatível, cancelamento, resposta antiga e distinção entre timeout e falha de transporte.
+
+## Composição assíncrona
+
+O adaptador de aplicação compõe codec, coordenador e transporte HTTP. Ele não registra corpo, credenciais ou sessão; publica somente mudanças de estado. Cancelamento encerra primeiro a tentativa no núcleo e depois aborta a operação HTTP, de modo que o callback de cancelamento não possa substituir o estado terminal. Os testes de integração usam exclusivamente credenciais e respostas sintéticas em loopback.
+
+Validação externa de 2026-09-22: após substituir uma macro GoogleTest usada por engano no harness Qt Test, o responsável informou `100% tests passed, 0 tests failed out of 67`. Os sete testes de integração adicionais cobrem sucesso sintético, credencial rejeitada por resposta HTTP, desafio não suportado, resposta incompatível, timeout, cancelamento e tentativa concorrente.
