@@ -9,3 +9,9 @@ O sucesso exige objetos `session` e `playdata`, sessão ativa com `sessionkey`, 
 Mensagens remotas de erro são classificadas, mas não atravessam diretamente para rich text ou logs. Senha, chave de sessão, tokens e corpo integral nunca são registrados. Este incremento implementa somente codificação e interpretação determinísticas com dados sintéticos; não envia credenciais nem autentica no laboratório.
 
 Validação externa de 2026-09-22: após a correção de uma asserção que ainda usava a API de `QString` sobre um contrato migrado para `std::string`, o responsável informou `100% tests passed, 0 tests failed out of 51`. Os oito testes deste incremento cobrem requisição mínima, credenciais vazias, sucesso completo, rejeição de autenticação, os dois formatos de desafio TOTP, JSON malformado e sucesso incompleto.
+
+## Coordenação de tentativas
+
+A máquina de estados interna usa identificadores monotônicos e permite uma única tentativa ativa. Cancelamento encerra a tentativa corrente; qualquer resposta posterior ou pertencente a identificador anterior é ignorada. Uma nova tentativa limpa sessão e falha anteriores. Sucesso, credencial rejeitada, desafio não suportado, resposta incompatível, timeout e falha de transporte permanecem resultados distintos. O núcleo não depende de Qt, sockets ou logging e não armazena credenciais.
+
+Validação externa de 2026-09-22: o responsável informou `100% tests passed, 0 tests failed out of 60`. Os nove testes adicionais cobrem IDs monotônicos, concorrência, sucesso, credencial rejeitada, desafio não suportado, resposta incompatível, cancelamento, resposta antiga e distinção entre timeout e falha de transporte.

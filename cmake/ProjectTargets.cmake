@@ -38,6 +38,7 @@ function(project_add_targets)
     add_library(
         session
         STATIC
+            "${PROJECT_SOURCE_DIR}/client/src/session/authentication/authentication_coordinator.cpp"
             "${PROJECT_SOURCE_DIR}/client/src/session/authentication/login_codec.cpp"
     )
     target_include_directories(

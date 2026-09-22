@@ -237,7 +237,7 @@ Fora do MVP: versões antigas/futuras, serviços oficiais, loja/pagamentos, cria
 
 ## 8. Próximos passos e estado real
 
-Atividade de engenharia atual: Fase 2 iniciada pelo [contrato de autenticação](phase2-authentication-contract.md), validado com 51/51 testes. A Fase 1 foi concluída no ambiente do responsável, com reprodutibilidade em máquina limpa ainda pendente conforme o [registro de aceite](phase1-acceptance.md). O codec inicial da Fase 2 não envia credenciais e rejeita desafios TOTP como não suportados; isso ainda não comprova autenticação real, sessão ou entrada no mundo. Gates de assets e integração visual permanecem explícitos.
+Atividade de engenharia atual: Fase 2 em andamento pelo [contrato de autenticação](phase2-authentication-contract.md), com codec e máquina de estados validados em 60/60 testes. A Fase 1 foi concluída no ambiente do responsável, com reprodutibilidade em máquina limpa ainda pendente conforme o [registro de aceite](phase1-acceptance.md). O código atual não envia credenciais e rejeita desafios TOTP como não suportados; isso ainda não comprova autenticação real, sessão ou entrada no mundo. Gates de assets e integração visual permanecem explícitos.
 
 Foram inspecionados fontes e recursos, verificados catálogo/hashes e produzidos documentos/regras. O resultado de 43/43 cobre apenas o bootstrap headless e seus componentes já implementados; ainda não demonstra compatibilidade operacional completa do novo cliente. Nenhum backend funcional foi encontrado nos recursos e nenhuma limpeza deles é recomendada.
 

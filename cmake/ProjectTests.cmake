@@ -3,6 +3,7 @@ include_guard(GLOBAL)
 function(project_add_tests)
     add_executable(
         unit_tests
+        "${PROJECT_SOURCE_DIR}/client/tests/authentication_coordinator_test.cpp"
         "${PROJECT_SOURCE_DIR}/client/tests/bootstrap_test.cpp"
         "${PROJECT_SOURCE_DIR}/client/tests/fixture_inspector_test.cpp"
         "${PROJECT_SOURCE_DIR}/client/tests/logger_test.cpp"
