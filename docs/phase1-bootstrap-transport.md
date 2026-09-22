@@ -1,6 +1,6 @@
 # Fase 1 — Estrutura do núcleo e transporte
 
-Estado: **em andamento**. O bootstrap estrutural foi iniciado em 2026-09-22. Os pontos de entrada CMake e vcpkg ficam na raiz do repositório por decisão do responsável; módulos auxiliares ficam em `cmake/`, e `client/` contém somente código, testes e configuração de execução. O responsável confirmou configuração/build do preset `windows-x64`, primeiro com 2/2 testes, depois com 9/9 após o logging, 17/17 após o transporte, 28/28 após o envelope externo 15.25 e 35/35 após o diagnóstico headless. A conexão passiva ao mundo de laboratório também foi validada com fechamento limpo e sem envio de payload.
+Estado: **implementação concluída; aceite final em revisão**. O bootstrap estrutural foi iniciado em 2026-09-22. Os pontos de entrada CMake e vcpkg ficam na raiz do repositório por decisão do responsável; módulos auxiliares ficam em `cmake/`, e `client/` contém somente código, testes e configuração de execução. O responsável confirmou configuração/build do preset `windows-x64`, primeiro com 2/2 testes, depois com 9/9 após o logging, 17/17 após o transporte, 28/28 após o envelope externo 15.25, 35/35 após o diagnóstico headless e 43/43 após o transporte HTTP. A conexão passiva ao mundo de laboratório também foi validada com fechamento limpo e sem envio de payload.
 
 ## Objetivo
 
@@ -71,6 +71,8 @@ Quarto registro externo de 2026-09-22: após a implementação do envelope exter
 Quinto registro externo de 2026-09-22: após a implementação do diagnóstico headless, o responsável informou `100% tests passed, 0 tests failed out of 35`. Esse resultado cobre também inspeção offline, fragmentação, concatenação, truncamento e limite exato de fixtures. A conexão passiva ao servidor de laboratório permanece uma validação manual separada.
 
 Sexto registro externo de 2026-09-22: o responsável executou `diagnostics.exe connect` contra o endpoint loopback configurado. O log registrou início, conexão estabelecida e fechamento com `connected=true`, sem envio de payload ou erro. Isso conclui a validação manual do diagnóstico passivo; não constitui evidência de autenticação ou compatibilidade do protocolo de jogo.
+
+Sétimo registro externo de 2026-09-22: após a implementação do transporte HTTP assíncrono, o responsável informou `100% tests passed, 0 tests failed out of 43`. Os oito testes adicionais cobrem resposta limitada, excesso de tamanho, deadline, cancelamento, redirect rejeitado, configuração inválida, bloqueio de HTTP externo sem TLS e operação concorrente. A suíte usa exclusivamente servidor sintético em loopback e não executa autenticação.
 
 **Não é aceite:** conexão TCP estabelecida como evidência de protocolo compatível; testes "passando" sem execução real; sucesso simulado para ocultar dependências ausentes.
 

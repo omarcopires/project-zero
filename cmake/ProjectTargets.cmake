@@ -50,6 +50,20 @@ function(project_add_targets)
     set_target_properties(transport PROPERTIES AUTOMOC ON)
 
     add_library(
+        http_transport
+        STATIC
+            "${PROJECT_SOURCE_DIR}/client/src/infrastructure/http/http_transport.cpp"
+    )
+    target_include_directories(
+        http_transport
+        PUBLIC
+            "${PROJECT_SOURCE_DIR}/client/src"
+    )
+    target_link_libraries(http_transport PUBLIC Qt6::Core Qt6::Network PRIVATE core)
+    project_apply_cpp_options(http_transport)
+    set_target_properties(http_transport PROPERTIES AUTOMOC ON)
+
+    add_library(
         logging
         STATIC
             "${PROJECT_SOURCE_DIR}/client/src/infrastructure/logging/logger.cpp"
