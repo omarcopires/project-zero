@@ -36,6 +36,19 @@ function(project_add_targets)
     project_apply_cpp_options(diagnostic_support)
 
     add_library(
+        session
+        STATIC
+            "${PROJECT_SOURCE_DIR}/client/src/session/authentication/login_codec.cpp"
+    )
+    target_include_directories(
+        session
+        PUBLIC
+            "${PROJECT_SOURCE_DIR}/client/src"
+    )
+    target_link_libraries(session PUBLIC Qt6::Core PRIVATE core)
+    project_apply_cpp_options(session)
+
+    add_library(
         transport
         STATIC
             "${PROJECT_SOURCE_DIR}/client/src/infrastructure/transport/tcp_transport.cpp"

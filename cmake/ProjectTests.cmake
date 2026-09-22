@@ -6,6 +6,7 @@ function(project_add_tests)
         "${PROJECT_SOURCE_DIR}/client/tests/bootstrap_test.cpp"
         "${PROJECT_SOURCE_DIR}/client/tests/fixture_inspector_test.cpp"
         "${PROJECT_SOURCE_DIR}/client/tests/logger_test.cpp"
+        "${PROJECT_SOURCE_DIR}/client/tests/login_codec_test.cpp"
         "${PROJECT_SOURCE_DIR}/client/tests/message_formatter_test.cpp"
         "${PROJECT_SOURCE_DIR}/client/tests/modern_frame_test.cpp"
     )
@@ -16,6 +17,7 @@ function(project_add_tests)
             diagnostic_support
             logging
             protocol
+            session
             GTest::gtest_main
     )
     project_apply_cpp_options(unit_tests)
