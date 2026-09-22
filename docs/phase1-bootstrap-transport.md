@@ -1,6 +1,6 @@
 # Fase 1 — Estrutura do núcleo e transporte
 
-Estado: **implementação concluída; aceite final em revisão**. O bootstrap estrutural foi iniciado em 2026-09-22. Os pontos de entrada CMake e vcpkg ficam na raiz do repositório por decisão do responsável; módulos auxiliares ficam em `cmake/`, e `client/` contém somente código, testes e configuração de execução. O responsável confirmou configuração/build do preset `windows-x64`, primeiro com 2/2 testes, depois com 9/9 após o logging, 17/17 após o transporte, 28/28 após o envelope externo 15.25, 35/35 após o diagnóstico headless e 43/43 após o transporte HTTP. A conexão passiva ao mundo de laboratório também foi validada com fechamento limpo e sem envio de payload.
+Estado: **concluída com ressalva de reprodutibilidade em máquina limpa**. O [registro de aceite](phase1-acceptance.md) consolida as evidências e limites. O responsável confirmou configuração/build do preset `windows-x64`, evolução até 43/43 testes e conexão passiva ao mundo de laboratório com fechamento limpo e sem envio de payload.
 
 ## Objetivo
 
