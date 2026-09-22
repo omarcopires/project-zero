@@ -1,6 +1,6 @@
 # Fase 1 — Estrutura do núcleo e transporte
 
-Estado: **não iniciada**. Documento de planejamento; nenhum arquivo de código foi criado. Data: 2026-09-17.
+Estado: **em andamento**. O bootstrap estrutural foi iniciado em 2026-09-22. Os pontos de entrada CMake e vcpkg ficam na raiz do repositório por decisão do responsável; módulos auxiliares ficam em `cmake/`, e `client/` contém somente código, testes e configuração de execução. O responsável confirmou configuração/build do preset `windows-x64`, primeiro com 2/2 testes, depois com 9/9 após o logging, 17/17 após o transporte e 28/28 após o envelope externo 15.25.
 
 ## Objetivo
 
@@ -17,13 +17,13 @@ Esta fase só inicia após a Fase 0 entregar:
 - origem única de Qt: **ports vcpkg**, com módulos/features selecionados na Fase 0; resolução e compatibilidade de ABI ainda precisam ser validadas externamente;
 - matriz de compatibilidade e inventário inicial de contratos do frontend.
 
-O [encerramento documental da Fase 0](phase0-acceptance.md) registra a base entregue e as ressalvas, conforme replanejamento explícito do plano. O bootstrap sem interface pode avançar; a Fase 1 permanece não iniciada nesta entrega. O contrato global não está fechado: evidência exata do enquadramento é obrigatória antes de implementá-lo. Resolução do baseline, versão do Ninja e compatibilidade da toolchain são gates do aceite externo da Fase 1, não resultados presumidos. Recursos e contratos visuais continuam gates dos incrementos correspondentes.
+O [encerramento documental da Fase 0](phase0-acceptance.md) registra a base entregue e as ressalvas, conforme replanejamento explícito do plano. O bootstrap sem interface foi iniciado; o contrato global não está fechado: evidência exata do enquadramento é obrigatória antes de implementá-lo. Resolução do baseline, versão do Ninja e compatibilidade da toolchain são gates do aceite externo da Fase 1, não resultados presumidos. Recursos e contratos visuais continuam gates dos incrementos correspondentes.
 
 ## Escopo
 
 **Incluído:**
 
-1. Estrutura de projeto `client/` com CMake por alvo, manifesto vcpkg e presets versionados.
+1. Estrutura de projeto com CMake por alvo, manifesto vcpkg e presets versionados na raiz; módulos CMake em `cmake/` e fontes/testes/configuração em `client/`.
 2. Núcleo de transporte: conexão TCP assíncrona, enquadramento conforme contrato 15.25, limites de mensagem, leitura incremental, timeouts, cancelamento e fechamento limpo.
 3. Executável de diagnóstico headless (sem QML) para exercitar transporte contra o servidor local.
 4. Logging estruturado sem credenciais/tokens; configuração local fora do Git.
@@ -53,12 +53,20 @@ Todo backend segue [Clean Architecture e Clean Code](coding-standards.md), com n
 
 | # | Entrega | Critério de aceite (validação do responsável/CI) |
 |---|---|---|
-| 1.1 | `client/CMakeLists.txt` + presets + `vcpkg.json` | Configure/build reproduzíveis em máquina limpa; sem caminhos pessoais; baseline fixado |
+| 1.1 | `CMakeLists.txt`, `CMakePresets.json`, `vcpkg.json` e módulos em `cmake/` | Configure/build reproduzíveis em máquina limpa; sem caminhos pessoais; baseline fixado |
 | 1.2 | Biblioteca `core` + alvo de testes | Testes unitários aprovados via CTest; sem dependência de rede |
 | 1.3 | Transporte TCP assíncrono | Conecta/desconecta do servidor local sem bloquear; timeouts e cancelamento funcionam |
 | 1.4 | Enquadramento 15.25 | Matriz de testes sintéticos aprovada; limites respeitados; erros tipados |
 | 1.5 | Diagnóstico headless | Conecta/desconecta em loopback sem enviar payload; analisa fixtures sintéticas offline e encerra limpo |
 | 1.6 | Logging estruturado | Nenhum segredo em logs; níveis configuráveis; sem `printf`/`std::cout` dispersos |
+
+Registro externo de 2026-09-22: o responsável compilou o bootstrap com o preset único `windows-x64` e informou `100% tests passed, 0 tests failed out of 2`. Isso valida os dois testes existentes naquela revisão do workspace; não abrange automaticamente os testes de logging adicionados depois desse registro.
+
+Segundo registro externo de 2026-09-22: após a implementação do logging, o responsável informou `100% tests passed, 0 tests failed out of 9`. Esse resultado cobre o bootstrap e os testes de logging daquela revisão; os testes de transporte adicionados posteriormente continuam pendentes.
+
+Terceiro registro externo de 2026-09-22: após a correção do harness de conexões locais, o responsável informou `100% tests passed, 0 tests failed out of 17`. Esse resultado cobre o transporte daquela revisão. O [contrato do envelope 15.25](phase1-framing-contract.md) e seus testes foram adicionados posteriormente e continuam pendentes de validação externa.
+
+Quarto registro externo de 2026-09-22: após a implementação do envelope externo 15.25, o responsável informou `100% tests passed, 0 tests failed out of 28`. Esse resultado cobre os testes de bootstrap, logging, transporte e framing daquela revisão.
 
 **Não é aceite:** conexão TCP estabelecida como evidência de protocolo compatível; testes "passando" sem execução real; sucesso simulado para ocultar dependências ausentes.
 
@@ -66,9 +74,9 @@ Todo backend segue [Clean Architecture e Clean Code](coding-standards.md), com n
 
 ### 1.1 — Bootstrap do projeto
 
-- Criar `client/CMakeLists.txt` com alvos descritivos: `core` (biblioteca), `diagnostics` (executável), `unit_tests` (testes); separar `transport`, `protocol` e `logging` conforme consumidores reais. Nunca usar marca ou prefixo derivado de repositório/referência.
-- Criar `client/vcpkg.json` com nome descritivo, dependências mínimas incluindo spdlog e `builtin-baseline` fixado. Declarar somente na implementação autorizada; não instalar nesta etapa.
-- Criar `client/CMakePresets.json` com presets `windows-debug` e `windows-release` (Ninja + MSVC, x64).
+- Manter `CMakeLists.txt` na raiz com alvos descritivos: `core` (biblioteca), `diagnostics` (executável), `unit_tests` (testes); dividir definições auxiliares em `cmake/` e separar `transport`, `protocol` e `logging` conforme consumidores reais. Nunca usar marca ou prefixo derivado de repositório/referência.
+- Manter `vcpkg.json` na raiz com nome descritivo, dependências mínimas incluindo spdlog e `builtin-baseline` fixado. Apenas declarar; não instalar pelo agente.
+- Manter `CMakePresets.json` na raiz com um único preset `windows-x64` (Ninja + MSVC, x64, Release), seguindo a operação do cliente de referência sem copiar seu triplet estático.
 - Definir padrão C++ e flags por alvo; não espalhar flags globais. Dependências concretas ficam privadas aos adaptadores; núcleo não depende de sockets, Qt/QML ou spdlog.
 - Configuração local (endpoints, caminhos) em arquivo fora do Git, com exemplo versionado.
 
@@ -110,8 +118,8 @@ Todo backend segue [Clean Architecture e Clean Code](coding-standards.md), com n
 
 ## Verificações da fase (responsável/CI)
 
-1. `cmake --preset windows-debug` e build em máquina limpa — reproduzível.
-2. `ctest --preset windows-debug` — todos os testes unitários aprovados.
+1. `cmake --preset windows-x64` e build em máquina limpa — reproduzível.
+2. `ctest --preset windows-x64` — todos os testes unitários aprovados.
 3. Diagnóstico conecta no servidor local e encerra limpo.
 4. Matriz de enquadramento aprovada (válidas/parciais/concatenadas/inválidas/truncadas).
 5. Logs sem segredos; configuração local fora do Git.
@@ -141,7 +149,7 @@ Ninja, Qt Network, GoogleTest e Qt Test foram selecionados na [Fase 0](phase0-co
 
 ### Caminho HTTP confirmado pelo responsável
 
-O fluxo HTTP → sessão → TCP foi identificado nos fontes do cliente e do servidor. O responsável confirmou builds atuais, seleção/login/jogo funcionais e autenticação por sessão com e-mail/senha em `http://127.0.0.1:8080/api/v1/webservice`. A tentativa GET fora do escopo, encerrada em `ConnectFailure`, está registrada no relatório da Fase 0 e não valida autenticação. A identificação exata dos binários fica para o registro externo. Endereço/porta TCP do jogo permanecem pendentes, sem inferência a partir da porta HTTP.
+O fluxo HTTP → sessão → TCP foi identificado nos fontes do cliente e do servidor. O responsável confirmou builds atuais, seleção/login/jogo funcionais e autenticação por sessão com e-mail/senha em `http://127.0.0.1:8080/api/v1/webservice`. A tentativa GET fora do escopo, encerrada em `ConnectFailure`, está registrada no relatório da Fase 0 e não valida autenticação. A identificação exata dos binários fica para o registro externo. O mundo de laboratório foi confirmado em `localhost:7172`; login TCP 7171 e API HTTP não são substitutos automáticos um do outro.
 
 Para esse caminho, a Fase 1 inclui somente a infraestrutura HTTP assíncrona necessária: limites de resposta, deadline, cancelamento, fechamento e classificação de erros. A composição de autenticação, credenciais e interpretação de sessão pertence à Fase 2. O responsável adiou 2FA para depois do incremento inicial: um desafio exigido pelo serviço deve resultar em fluxo não suportado, nunca em sucesso ou bypass. Não seguir redirects para endpoints não autorizados nem implementar fallback automático para login TCP. HTTP sem TLS fica restrito ao laboratório em loopback; exposição externa exige decisão de transporte seguro.
 
@@ -177,7 +185,7 @@ O registro de aceite, a preencher futuramente pelo responsável, deve conter: re
 
 Planejar CI Windows desde esta fase: checkout, toolchain fixada, configure/build, CTest, relatórios sanitizados e conferência dos originais. É apenas desenho documental; nenhum workflow foi criado ou disparado. Uma futura criação de workflow requer solicitação própria e revisão do responsável, especialmente dos gatilhos. Cache não substitui baseline nem validação em máquina limpa.
 
-Presets de configuração, build e teste devem ser declarados separadamente, com diretório fonte `client/` e nomes coerentes; a existência de um configure preset não cria automaticamente um test preset. O triplet pertence à configuração CMake/vcpkg, não a um campo inventado no manifesto. Comandos de validação anteriores são exemplos futuros, ainda não verificados.
+Presets de configuração, build e teste devem ser declarados separadamente, com a raiz do repositório como diretório fonte e nomes coerentes; a existência de um configure preset não cria automaticamente um test preset. O triplet pertence à configuração CMake/vcpkg, não a um campo inventado no manifesto. Comandos de validação anteriores são exemplos futuros, ainda não verificados.
 
 ## Prompts desta fase
 

@@ -1,6 +1,6 @@
 # Plano do novo cliente
 
-Data: 2026-09-17. Estado: plano-base aprovado; Fase 0 documental concluída com ressalvas; Fase 1 e implementação não iniciadas. Este documento consolida o planejamento, a preservação integral do frontend original e o encerramento solicitado pelo responsável, com gates técnicos explícitos.
+Data-base: 2026-09-17. Estado atualizado em 2026-09-22: plano-base aprovado; Fase 0 documental concluída com ressalvas; bootstrap da Fase 1 em andamento, compilado e validado externamente. Este documento consolida o planejamento, a preservação integral do frontend original e os gates técnicos explícitos.
 
 ## 1. Decisões confirmadas
 
@@ -202,13 +202,13 @@ Para cada incremento: evidência no servidor → eventos/domínio → adaptador 
 
 ## 6. Organização futura proposta
 
-Somente documentação e instruções são criadas nesta tarefa. A estrutura abaixo não foi inicializada:
+A organização inicialmente proposta foi atualizada quando o bootstrap começou em 2026-09-22: arquivos de entrada da build permanecem na raiz, módulos auxiliares ficam em `cmake/` e `client/` contém código, testes e configuração de execução.
 
 | Caminho proposto | Responsabilidade |
 |---|---|
-| `client/CMakeLists.txt` | Alvos separados e declaração de testes |
-| `client/CMakePresets.json` | Configurações reproduzíveis Windows, sem caminhos pessoais |
-| `client/vcpkg.json` | Dependências e baseline fixado |
+| `CMakeLists.txt` e `cmake/` | Entrada na raiz e módulos com alvos/opções/testes separados |
+| `CMakePresets.json` | Configurações reproduzíveis Windows, sem caminhos pessoais |
+| `vcpkg.json` | Dependências e baseline fixado |
 | `client/src/core/` | Domínio e regras |
 | `client/src/network/` | Transporte |
 | `client/src/protocol/` | Contrato exclusivo 15.25 |
@@ -237,8 +237,8 @@ Fora do MVP: versões antigas/futuras, serviços oficiais, loja/pagamentos, cria
 
 ## 8. Próximos passos e estado real
 
-Próxima atividade de engenharia: bootstrap sem interface da Fase 1, ainda não iniciado. A Fase 0 documental foi encerrada com ressalvas após as verificações e confirmações do responsável. Gates de contrato, assets, integração visual e toolchain permanecem explícitos; o encerramento não autoriza implementar contratos desconhecidos ou executar build/testes pelo agente.
+Atividade de engenharia atual: Fase 1 em andamento. O bootstrap sem interface foi criado em 2026-09-22 com os arquivos CMake/vcpkg na raiz e módulos CMake separados. O responsável confirmou build do preset `windows-x64` e CTest com 2/2 testes no bootstrap, 9/9 após o logging, 17/17 após o transporte e 28/28 após o envelope externo 15.25. A Fase 0 documental foi encerrada com ressalvas após as verificações e confirmações do responsável. Gates de assets e integração visual permanecem explícitos; o encerramento não autoriza implementar contratos desconhecidos ou executar build/testes pelo agente.
 
-Foram inspecionados fontes e recursos, verificados catálogo/hashes e produzidos documentos/regras. Não há compatibilidade operacional do cliente novo, métricas ou testes aprovados a declarar. Nenhum backend funcional foi encontrado nos recursos e nenhuma limpeza deles é recomendada.
+Foram inspecionados fontes e recursos, verificados catálogo/hashes e produzidos documentos/regras. O resultado de 28/28 cobre apenas o bootstrap headless e seus componentes já implementados; ainda não demonstra compatibilidade operacional completa do novo cliente. Nenhum backend funcional foi encontrado nos recursos e nenhuma limpeza deles é recomendada.
 
 Referências: [auditoria](backend-resource-audit.md), [padrões de código](coding-standards.md), [política de validação](validation-policy.md), [migração de regras](rules-migration.md) e [instruções dos agentes](../.github/copilot-instructions.md).

@@ -10,6 +10,19 @@ function(project_add_targets)
     )
 
     add_library(
+        protocol
+        STATIC
+            "${PROJECT_SOURCE_DIR}/client/src/protocol/framing/modern_frame.cpp"
+    )
+    target_include_directories(
+        protocol
+        PUBLIC
+            "${PROJECT_SOURCE_DIR}/client/src"
+    )
+    target_link_libraries(protocol PRIVATE core)
+    project_apply_cpp_options(protocol)
+
+    add_library(
         transport
         STATIC
             "${PROJECT_SOURCE_DIR}/client/src/infrastructure/transport/tcp_transport.cpp"
@@ -41,6 +54,6 @@ function(project_add_targets)
         diagnostics
         "${PROJECT_SOURCE_DIR}/client/src/diagnostics/main.cpp"
     )
-    target_link_libraries(diagnostics PRIVATE core transport logging Qt6::Core)
+    target_link_libraries(diagnostics PRIVATE core protocol transport logging Qt6::Core)
     project_apply_cpp_options(diagnostics)
 endfunction()
