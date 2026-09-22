@@ -4,11 +4,20 @@ function(project_add_tests)
     add_executable(
         unit_tests
         "${PROJECT_SOURCE_DIR}/client/tests/bootstrap_test.cpp"
+        "${PROJECT_SOURCE_DIR}/client/tests/fixture_inspector_test.cpp"
         "${PROJECT_SOURCE_DIR}/client/tests/logger_test.cpp"
         "${PROJECT_SOURCE_DIR}/client/tests/message_formatter_test.cpp"
         "${PROJECT_SOURCE_DIR}/client/tests/modern_frame_test.cpp"
     )
-    target_link_libraries(unit_tests PRIVATE core logging protocol GTest::gtest_main)
+    target_link_libraries(
+        unit_tests
+        PRIVATE
+            core
+            diagnostic_support
+            logging
+            protocol
+            GTest::gtest_main
+    )
     project_apply_cpp_options(unit_tests)
 
     include(GoogleTest)

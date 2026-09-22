@@ -23,6 +23,19 @@ function(project_add_targets)
     project_apply_cpp_options(protocol)
 
     add_library(
+        diagnostic_support
+        STATIC
+            "${PROJECT_SOURCE_DIR}/client/src/diagnostics/fixture_inspector.cpp"
+    )
+    target_include_directories(
+        diagnostic_support
+        PUBLIC
+            "${PROJECT_SOURCE_DIR}/client/src"
+    )
+    target_link_libraries(diagnostic_support PUBLIC protocol PRIVATE core)
+    project_apply_cpp_options(diagnostic_support)
+
+    add_library(
         transport
         STATIC
             "${PROJECT_SOURCE_DIR}/client/src/infrastructure/transport/tcp_transport.cpp"
@@ -54,6 +67,15 @@ function(project_add_targets)
         diagnostics
         "${PROJECT_SOURCE_DIR}/client/src/diagnostics/main.cpp"
     )
-    target_link_libraries(diagnostics PRIVATE core protocol transport logging Qt6::Core)
+    target_link_libraries(
+        diagnostics
+        PRIVATE
+            core
+            diagnostic_support
+            logging
+            protocol
+            transport
+            Qt6::Core
+    )
     project_apply_cpp_options(diagnostics)
 endfunction()
