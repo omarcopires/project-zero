@@ -17,9 +17,33 @@ function(project_add_tests)
         qt_integration_tests
         "${PROJECT_SOURCE_DIR}/client/tests/qt_bootstrap_test.cpp"
     )
-    target_link_libraries(qt_integration_tests PRIVATE Qt6::Core Qt6::Test)
+    target_link_libraries(
+        qt_integration_tests
+        PRIVATE
+            transport
+            Qt6::Core
+            Qt6::Network
+            Qt6::Test
+    )
     project_apply_cpp_options(qt_integration_tests)
     set_target_properties(qt_integration_tests PROPERTIES AUTOMOC ON)
 
-    add_test(NAME qt_integration_tests COMMAND qt_integration_tests)
+    foreach(
+        test_case
+        IN ITEMS
+            providesCoreApplication
+            connectsAndClosesCleanly
+            buffersIncomingData
+            rejectsInputBeyondConfiguredLimit
+            rejectsOutputBeyondConfiguredLimit
+            rejectsInvalidConfiguration
+            reportsInactivityTimeout
+            reportsRemoteClosure
+            closesIdempotently
+    )
+        add_test(
+            NAME "qt_integration.${test_case}"
+            COMMAND qt_integration_tests "${test_case}"
+        )
+    endforeach()
 endfunction()

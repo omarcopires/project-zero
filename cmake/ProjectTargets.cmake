@@ -9,8 +9,19 @@ function(project_add_targets)
             "${PROJECT_SOURCE_DIR}/client/src"
     )
 
-    add_library(transport INTERFACE)
-    target_link_libraries(transport INTERFACE core Qt6::Core Qt6::Network)
+    add_library(
+        transport
+        STATIC
+            "${PROJECT_SOURCE_DIR}/client/src/infrastructure/transport/tcp_transport.cpp"
+    )
+    target_include_directories(
+        transport
+        PUBLIC
+            "${PROJECT_SOURCE_DIR}/client/src"
+    )
+    target_link_libraries(transport PUBLIC Qt6::Core Qt6::Network PRIVATE core)
+    project_apply_cpp_options(transport)
+    set_target_properties(transport PROPERTIES AUTOMOC ON)
 
     add_library(
         logging
