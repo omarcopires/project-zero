@@ -1,0 +1,26 @@
+{
+  "name": "client-engine",
+  "version-string": "0.1.0",
+  "builtin-baseline": "fa8cecf91d7f31a1715a7a6524f208897ffb33ce",
+  "dependencies": [
+    {
+      "name": "qtbase",
+      "default-features": false,
+      "features": [
+        "network",
+        "openssl",
+        "testlib",
+        "thread"
+      ]
+    },
+    {
+      "name": "spdlog",
+      "default-features": false,
+      "features": [
+        "fmt",
+        "tz-offset"
+      ]
+    },
+    "gtest"
+  ]
+}

@@ -15,10 +15,10 @@ Criar a estrutura inicial do novo motor conforme [plano da Fase 1](../../docs/ph
 
 ## Entregas (arquivos novos, fora das árvores protegidas)
 
-1. `client/CMakeLists.txt` — alvos descritivos separados: `core` (biblioteca), `diagnostics` (executável headless), `unit_tests` (testes). Sem marca ou prefixo de repositório. Dependências por alvo seguem Clean Architecture; infraestrutura depende das portas internas, nunca o contrário.
-2. `client/vcpkg.json` — dependências mínimas, incluindo spdlog, e `builtin-baseline` fixado conforme decisão documentada; nome descritivo do manifesto; não inventar campo de triplet. Apenas declarar, não instalar.
-3. `client/CMakePresets.json` — configure/build/test presets coerentes para `windows-debug` e `windows-release`, com triplet na configuração CMake/vcpkg, sem caminhos pessoais. Ninja + MSVC/x64 é proposta sujeita à Fase 0.
-4. `client/src/core/`, `client/src/network/`, `client/tests/` — diretórios com esqueleto mínimo e headers de entrada.
+1. `CMakeLists.txt` na raiz e módulos em `cmake/` — alvos descritivos separados: `core` (biblioteca), `diagnostics` (executável headless), `unit_tests` (testes). Nenhum arquivo CMake fica em `client/`. Sem marca ou prefixo de repositório. Dependências por alvo seguem Clean Architecture; infraestrutura depende das portas internas, nunca o contrário.
+2. `vcpkg.json` na raiz — dependências mínimas, incluindo spdlog, e `builtin-baseline` fixado conforme decisão documentada; nome descritivo do manifesto; não inventar campo de triplet. Apenas declarar, não instalar.
+3. `CMakePresets.json` na raiz — um único configure/build/test preset `windows-x64`, Release, com triplet dinâmico na configuração CMake/vcpkg e sem caminhos pessoais. Ninja + MSVC/x64 é a seleção da Fase 0.
+4. `client/src/` e `client/tests/` — código e testes mínimos exigidos pelos alvos, sem arquivos de configuração da build.
 5. `client/config/local.example.ini` (ou formato equivalente) — exemplo de configuração local; a configuração real fica fora do Git.
 6. `client/.gitignore` — artefatos de build, configuração local e logs.
 

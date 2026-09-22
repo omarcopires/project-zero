@@ -1,0 +1,5 @@
+/out/
+/debug.log
+/client/config/local.ini
+/.cache/
+/.vs/
