@@ -1,4 +1,5 @@
 #include "protocol/binary/adler32.h"
+#include "protocol/binary/length_prefixed_string.h"
 #include "protocol/binary/little_endian.h"
 
 #include <gtest/gtest.h>
@@ -42,6 +43,16 @@ namespace protocol::binary {
 			};
 
 			EXPECT_EQ(adler32(payload), 0x024000F6U);
+		}
+
+		TEST(ProtocolBinary, AppendsLengthPrefixedString) {
+			std::vector<std::byte> bytes;
+			ASSERT_TRUE(appendStringU16(bytes, "abc"));
+
+			const std::vector expected {
+				std::byte { 0x03 }, std::byte { 0x00 }, static_cast<std::byte>('a'), static_cast<std::byte>('b'), static_cast<std::byte>('c')
+			};
+			EXPECT_EQ(bytes, expected);
 		}
 
 	}

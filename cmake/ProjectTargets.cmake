@@ -13,8 +13,10 @@ function(project_add_targets)
         protocol
         STATIC
             "${PROJECT_SOURCE_DIR}/client/src/protocol/binary/adler32.cpp"
+            "${PROJECT_SOURCE_DIR}/client/src/protocol/binary/length_prefixed_string.cpp"
             "${PROJECT_SOURCE_DIR}/client/src/protocol/binary/little_endian.cpp"
             "${PROJECT_SOURCE_DIR}/client/src/protocol/handshake/world_challenge_codec.cpp"
+            "${PROJECT_SOURCE_DIR}/client/src/protocol/handshake/world_login_block_codec.cpp"
             "${PROJECT_SOURCE_DIR}/client/src/protocol/framing/modern_frame.cpp"
     )
     target_include_directories(

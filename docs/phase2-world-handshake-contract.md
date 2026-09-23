@@ -28,3 +28,9 @@ Validação externa de 2026-09-23: o responsável informou `100% tests passed, 0
 Constantes do handshake ficam em um catálogo interno com nomes de domínio, incluindo tamanhos, offsets, marcadores, opcode, versão, identificador do login e dimensões de RSA/XTEA. Leitura e escrita little-endian e Adler-32 ficam em módulos binários reutilizáveis. Fixtures conhecidas mantêm bytes literais como evidência independente; mutações e código de produção usam os nomes do catálogo.
 
 Validação externa de 2026-09-23: após a extração do catálogo e das primitivas binárias, o responsável informou `100% tests passed, 0 tests failed out of 86`. Os quatro testes adicionais cobrem leitura little-endian, recusa de leitura fora dos limites, escrita little-endian e um vetor Adler-32 conhecido.
+
+## Bloco RSA em plaintext
+
+O encoder monta exatamente 128 bytes antes da criptografia: zero inicial, quatro palavras XTEA little-endian, flag GM desabilitada, chave de sessão e personagem como strings `u16 + bytes`, timestamp, byte aleatório, probe `OTCv8`, versão 1525 e padding zero. O primeiro incremento inclui somente campos efetivamente consumidos pelo servidor atual; extensões do cliente de referência que o parser atual não consome não são inventadas. Entradas vazias, strings não representáveis e payload maior que o bloco são rejeitados.
+
+Validação externa de 2026-09-23: o responsável informou `100% tests passed, 0 tests failed out of 93`. Os sete testes adicionais cobrem string com prefixo `u16`, layout completo do bloco, campos obrigatórios vazios, comprimento de string não representável, excesso do bloco RSA e preenchimento do limite exato de 128 bytes.

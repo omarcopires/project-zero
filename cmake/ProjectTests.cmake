@@ -13,6 +13,7 @@ function(project_add_tests)
         "${PROJECT_SOURCE_DIR}/client/tests/modern_frame_test.cpp"
         "${PROJECT_SOURCE_DIR}/client/tests/protocol_binary_test.cpp"
         "${PROJECT_SOURCE_DIR}/client/tests/world_challenge_codec_test.cpp"
+        "${PROJECT_SOURCE_DIR}/client/tests/world_login_block_codec_test.cpp"
     )
     target_link_libraries(
         unit_tests

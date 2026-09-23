@@ -2,6 +2,7 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <string_view>
 
 namespace protocol::constants {
 
@@ -23,5 +24,8 @@ namespace protocol::constants {
 	inline constexpr std::uint16_t currentProtocolVersion = 1525;
 	inline constexpr std::size_t rsaBlockSize = 128;
 	inline constexpr std::size_t xteaKeyWordCount = 4;
+	inline constexpr std::uint8_t rsaPlaintextLeadingByte = 0x00;
+	inline constexpr std::uint8_t gameMasterFlagDisabled = 0x00;
+	inline constexpr std::string_view otcV8Probe = "OTCv8";
 
 }
