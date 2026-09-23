@@ -1,5 +1,7 @@
 #include "session/authentication/login_codec.h"
 
+#include "core/client_identity.h"
+
 #include <gtest/gtest.h>
 
 #include <QJsonDocument>
@@ -25,7 +27,7 @@ namespace session::authentication {
 			EXPECT_EQ(object.value(QStringLiteral("email")).toString(), QStringLiteral("test@example.invalid"));
 			EXPECT_EQ(object.value(QStringLiteral("password")).toString(), QStringLiteral("secret"));
 			EXPECT_EQ(object.value(QStringLiteral("twoFactorAction")).toString(), QStringLiteral("skip"));
-			EXPECT_EQ(object.value(QStringLiteral("version")).toInt(), 1525);
+			EXPECT_EQ(object.value(QStringLiteral("version")).toInt(), client::identity::version);
 		}
 
 		TEST(LoginCodec, RejectsEmptyCredentials) {

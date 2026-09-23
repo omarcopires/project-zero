@@ -1,5 +1,7 @@
 #include "session/authentication/login_codec.h"
 
+#include "core/client_identity.h"
+
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -37,7 +39,7 @@ namespace session::authentication {
 
 	std::optional<QByteArray> encodeLoginRequest(const LoginRequest &request) {
 		if (request.email.empty() || request.email.size() > 255 || request.password.empty()
-		    || request.password.size() > 1024 || request.clientVersion <= 0) {
+		    || request.password.size() > 1024) {
 			return std::nullopt;
 		}
 
@@ -47,7 +49,7 @@ namespace session::authentication {
 		object.insert(QStringLiteral("password"), QString::fromStdString(request.password));
 		object.insert(QStringLiteral("twoFactorAction"), QStringLiteral("skip"));
 		object.insert(QStringLiteral("stayloggedin"), true);
-		object.insert(QStringLiteral("version"), request.clientVersion);
+		object.insert(QStringLiteral("version"), client::identity::version);
 		return QJsonDocument(object).toJson(QJsonDocument::Compact);
 	}
 

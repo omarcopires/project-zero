@@ -30,10 +30,7 @@ namespace protocol::handshake {
 		}
 		binary::appendU32(plaintext, request.challenge.timestamp);
 		plaintext.push_back(static_cast<std::byte>(request.challenge.random));
-		if (!binary::appendStringU16(plaintext, constants::otcV8Probe)) {
-			return { .status = WorldLoginBlockStatus::StringTooLong };
-		}
-		binary::appendU16(plaintext, request.otcV8Version);
+		binary::appendU16(plaintext, 0);
 
 		if (plaintext.size() > constants::rsaBlockSize) {
 			return { .status = WorldLoginBlockStatus::PayloadTooLarge };

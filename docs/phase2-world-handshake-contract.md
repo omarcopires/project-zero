@@ -17,7 +17,7 @@ O decoder deste incremento exige comprimento exato e valida checksum, marcador, 
 
 ## Login subsequente confirmado
 
-Após validar o desafio, o cliente monta o login com identificador de protocolo `0x000A`, sistema operacional, versão de protocolo 1525, versão de cliente de 32 bits, duas strings de versão/asset e preview state. O bloco RSA de 128 bytes começa com zero, contém quatro palavras XTEA, flag de game master, chave de sessão, personagem, timestamp e byte aleatório, seguido pelo probe OTCv8 e padding. O servidor descriptografa esse bloco antes de habilitar XTEA.
+Após validar o desafio, o cliente monta o login com identificador de protocolo `0x000A`, sistema operacional, a versão única do cliente 1525 nos campos numéricos exigidos pelo fio, texto de versão derivado automaticamente, identificador de assets e preview state. O bloco RSA de 128 bytes começa com zero, contém quatro palavras XTEA, flag de game master, chave de sessão, personagem, timestamp e byte aleatório, seguido pelo campo opcional de extensão vazio e padding. O servidor descriptografa esse bloco antes de habilitar XTEA.
 
 A escrita exata do bloco RSA, sua chave pública, o probe estendido, checksum/sequência externa e a ativação da criptografia serão implementados em incrementos separados. Nenhum pacote de login foi produzido ou enviado nesta etapa.
 
@@ -31,7 +31,7 @@ Validação externa de 2026-09-23: após a extração do catálogo e das primiti
 
 ## Bloco RSA em plaintext
 
-O encoder monta exatamente 128 bytes antes da criptografia: zero inicial, quatro palavras XTEA little-endian, flag GM desabilitada, chave de sessão e personagem como strings `u16 + bytes`, timestamp, byte aleatório, probe `OTCv8`, versão 1525 e padding zero. O primeiro incremento inclui somente campos efetivamente consumidos pelo servidor atual; extensões do cliente de referência que o parser atual não consome não são inventadas. Entradas vazias, strings não representáveis e payload maior que o bloco são rejeitados.
+O encoder monta exatamente 128 bytes antes da criptografia: zero inicial, quatro palavras XTEA little-endian, flag GM desabilitada, chave de sessão e personagem como strings `u16 + bytes`, timestamp, byte aleatório, extensão opcional vazia e padding zero. O cliente não anuncia identidade ou versão de outro cliente. Entradas vazias, strings não representáveis e payload maior que o bloco são rejeitados.
 
 Validação externa de 2026-09-23: o responsável informou `100% tests passed, 0 tests failed out of 93`. Os sete testes adicionais cobrem string com prefixo `u16`, layout completo do bloco, campos obrigatórios vazios, comprimento de string não representável, excesso do bloco RSA e preenchimento do limite exato de 128 bytes.
 
@@ -40,3 +40,9 @@ Validação externa de 2026-09-23: o responsável informou `100% tests passed, 0
 O bloco completo é interpretado como inteiro big-endian e elevado ao expoente público `65537` módulo a chave OpenTibia de 1024 bits, sem padding, em conformidade com o cliente e o servidor fixados acima. A operação usa diretamente o componente criptográfico OpenSSL, agora declarado como dependência do projeto, e nunca recebe a chave privada. Tamanho diferente de 128 bytes, chave pública inválida e mensagem maior ou igual ao módulo são falhas explícitas.
 
 Validação externa de 2026-09-23: o responsável informou `100% tests passed, 0 tests failed out of 98`. Os cinco testes adicionais cobrem vetor OpenTibia conhecido, identidade matemática para o valor um, tamanho incorreto, chave/expoente inválidos e mensagem fora do módulo. A criptografia ainda não está acoplada à montagem do pacote nem ao transporte.
+
+## Pacote completo de login
+
+O encoder do pacote compõe o frame moderno inteiro sem acessar a rede. O corpo contém Adler-32, identificador `0x000A`, sistema Windows neutro `2`, a versão única do cliente `1525` escrita nos dois campos numéricos exigidos pelo protocolo, texto `"1525"` gerado dessa mesma constante, identificador de assets fornecido pela aplicação, preview state zero e o bloco RSA criptografado. Não existe uma configuração separada de versão do servidor: incompatibilidade é decisão do servidor. Um padding zero final satisfaz o contrato moderno `(bodySize - 4) % 8 == 0`; com identificador de assets de quatro bytes, o exemplo ocupa 156 bytes de corpo e 158 bytes com o cabeçalho externo.
+
+Validação externa de 2026-09-23: após remover a identidade do cliente de referência e centralizar a versão do projeto em uma única constante compartilhada pela autenticação e pelo handshake, o responsável informou `100% tests passed, 0 tests failed out of 103`. Os cinco testes adicionais verificam layout e checksum completos, determinismo, metadados vazios, limite `u16` e propagação de bloco de login inválido. O resultado ainda é apenas um buffer pronto para envio: conexão, escrita no transporte e ativação posterior de XTEA não fazem parte deste incremento.

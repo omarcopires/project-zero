@@ -21,12 +21,12 @@ namespace protocol::constants {
 	inline constexpr std::uint8_t modernChallengeTrailer = 0x71;
 
 	inline constexpr std::uint16_t gameLoginProtocolId = 0x000A;
-	inline constexpr std::uint16_t currentProtocolVersion = 1525;
+	inline constexpr std::uint16_t windowsOperatingSystem = 2;
+	inline constexpr std::uint8_t gamePreviewStateDisabled = 0x00;
 	inline constexpr std::size_t rsaBlockSize = 128;
 	inline constexpr std::size_t xteaKeyWordCount = 4;
 	inline constexpr std::uint8_t rsaPlaintextLeadingByte = 0x00;
 	inline constexpr std::uint8_t gameMasterFlagDisabled = 0x00;
-	inline constexpr std::string_view otcV8Probe = "OTCv8";
 	inline constexpr std::uint32_t openTibiaRsaExponent = 65537;
 	inline constexpr std::string_view openTibiaRsaModulus =
 		"1091201329673994292788609605089955415282375029027981291234687579"

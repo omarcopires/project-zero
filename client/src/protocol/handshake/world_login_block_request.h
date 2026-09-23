@@ -14,7 +14,6 @@ namespace protocol::handshake {
 		std::string sessionKey;
 		std::string characterName;
 		WorldChallenge challenge;
-		std::uint16_t otcV8Version = constants::currentProtocolVersion;
 	};
 
 }
