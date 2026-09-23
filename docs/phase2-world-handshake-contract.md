@@ -22,3 +22,9 @@ Após validar o desafio, o cliente monta o login com identificador de protocolo 
 A escrita exata do bloco RSA, sua chave pública, o probe estendido, checksum/sequência externa e a ativação da criptografia serão implementados em incrementos separados. Nenhum pacote de login foi produzido ou enviado nesta etapa.
 
 Validação externa de 2026-09-23: o responsável informou `100% tests passed, 0 tests failed out of 82`. Os seis testes adicionais cobrem uma fixture moderna conhecida, comprimento inesperado, checksum inválido, marcador inicial inválido, opcode inválido e trailer inválido.
+
+## Catálogo e primitivas binárias
+
+Constantes do handshake ficam em um catálogo interno com nomes de domínio, incluindo tamanhos, offsets, marcadores, opcode, versão, identificador do login e dimensões de RSA/XTEA. Leitura e escrita little-endian e Adler-32 ficam em módulos binários reutilizáveis. Fixtures conhecidas mantêm bytes literais como evidência independente; mutações e código de produção usam os nomes do catálogo.
+
+Validação externa de 2026-09-23: após a extração do catálogo e das primitivas binárias, o responsável informou `100% tests passed, 0 tests failed out of 86`. Os quatro testes adicionais cobrem leitura little-endian, recusa de leitura fora dos limites, escrita little-endian e um vetor Adler-32 conhecido.

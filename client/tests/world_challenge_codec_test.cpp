@@ -1,4 +1,5 @@
 #include "protocol/handshake/world_challenge_codec.h"
+#include "protocol/constants/world_handshake_constants.h"
 
 #include <gtest/gtest.h>
 
@@ -32,7 +33,7 @@ namespace protocol::handshake {
 		void updateChecksum(ChallengeBytes &bytes) {
 			std::uint32_t a = 1;
 			std::uint32_t b = 0;
-			for (const auto value : std::span(bytes).subspan(4)) {
+			for (const auto value : std::span(bytes).subspan(constants::checksumSize)) {
 				a = (a + std::to_integer<std::uint8_t>(value)) % 65521;
 				b = (b + a) % 65521;
 			}
@@ -60,14 +61,14 @@ namespace protocol::handshake {
 
 		TEST(WorldChallengeCodec, RejectsInvalidChecksum) {
 			auto bytes = knownChallenge();
-			bytes[10] = std::byte { 0x5B };
+			bytes[constants::checksumSize + constants::challengeRandomOffset] = std::byte { 0x5B };
 
 			EXPECT_EQ(decodeWorldChallenge(bytes).status, WorldChallengeStatus::InvalidChecksum);
 		}
 
 		TEST(WorldChallengeCodec, RejectsInvalidPaddingMarker) {
 			auto bytes = knownChallenge();
-			bytes[4] = std::byte { 0x00 };
+			bytes[constants::checksumSize + constants::challengePaddingOffset] = std::byte { 0x00 };
 			updateChecksum(bytes);
 
 			EXPECT_EQ(decodeWorldChallenge(bytes).status, WorldChallengeStatus::InvalidPadding);
@@ -75,7 +76,7 @@ namespace protocol::handshake {
 
 		TEST(WorldChallengeCodec, RejectsInvalidOpcode) {
 			auto bytes = knownChallenge();
-			bytes[5] = std::byte { 0x20 };
+			bytes[constants::checksumSize + constants::challengeOpcodeOffset] = std::byte { 0x20 };
 			updateChecksum(bytes);
 
 			EXPECT_EQ(decodeWorldChallenge(bytes).status, WorldChallengeStatus::InvalidOpcode);
@@ -83,7 +84,7 @@ namespace protocol::handshake {
 
 		TEST(WorldChallengeCodec, RejectsInvalidTrailer) {
 			auto bytes = knownChallenge();
-			bytes[11] = std::byte { 0x70 };
+			bytes[constants::checksumSize + constants::challengeTrailerOffset] = std::byte { 0x70 };
 			updateChecksum(bytes);
 
 			EXPECT_EQ(decodeWorldChallenge(bytes).status, WorldChallengeStatus::InvalidTrailer);

@@ -237,7 +237,7 @@ Fora do MVP: versões antigas/futuras, serviços oficiais, loja/pagamentos, cria
 
 ## 8. Próximos passos e estado real
 
-Atividade de engenharia atual: Fase 2 em andamento pelos contratos de [autenticação](phase2-authentication-contract.md) e [handshake do mundo](phase2-world-handshake-contract.md), com 82/82 testes. A Fase 1 foi concluída no ambiente do responsável, com reprodutibilidade em máquina limpa ainda pendente conforme o [registro de aceite](phase1-acceptance.md). O código atual ainda não enviou credenciais reais nem pacote de login do mundo e rejeita desafios TOTP como não suportados; isso não comprova autenticação real, sessão ou entrada no mundo. Gates de assets e integração visual permanecem explícitos.
+Atividade de engenharia atual: Fase 2 em andamento pelos contratos de [autenticação](phase2-authentication-contract.md) e [handshake do mundo](phase2-world-handshake-contract.md), com catálogo binário e 86/86 testes. A Fase 1 foi concluída no ambiente do responsável, com reprodutibilidade em máquina limpa ainda pendente conforme o [registro de aceite](phase1-acceptance.md). O código atual ainda não enviou credenciais reais nem pacote de login do mundo e rejeita desafios TOTP como não suportados; isso não comprova autenticação real, sessão ou entrada no mundo. Gates de assets e integração visual permanecem explícitos.
 
 Foram inspecionados fontes e recursos, verificados catálogo/hashes e produzidos documentos/regras. O resultado de 43/43 cobre apenas o bootstrap headless e seus componentes já implementados; ainda não demonstra compatibilidade operacional completa do novo cliente. Nenhum backend funcional foi encontrado nos recursos e nenhuma limpeza deles é recomendada.
 

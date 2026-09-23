@@ -12,6 +12,8 @@ function(project_add_targets)
     add_library(
         protocol
         STATIC
+            "${PROJECT_SOURCE_DIR}/client/src/protocol/binary/adler32.cpp"
+            "${PROJECT_SOURCE_DIR}/client/src/protocol/binary/little_endian.cpp"
             "${PROJECT_SOURCE_DIR}/client/src/protocol/handshake/world_challenge_codec.cpp"
             "${PROJECT_SOURCE_DIR}/client/src/protocol/framing/modern_frame.cpp"
     )
