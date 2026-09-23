@@ -57,10 +57,16 @@ Validação externa de 2026-09-23: o responsável informou `100% tests passed, 0
 
 Após o login, um pacote de saída recebe sequência entre `1` e `0x7FFFFFFF`, byte frontal com o tamanho do padding, padding traseiro até múltiplo de 8 e cifragem XTEA. A sequência permanece fora da área cifrada e o conjunto é envolvido pelo frame moderno. Na entrada, o decoder exige a sequência esperada, decifra somente a região XTEA e remove o padding validado. Sequência zero, desalinhamento, padding inválido e salto de sequência são falhas explícitas.
 
-O bit alto da palavra de sequência sinaliza compressão. Pacotes assim são reconhecidos, mas recusados como não suportados até que a descompressão limitada seja implementada; eles não são interpretados como payload comum. Validação externa de 2026-09-23: o responsável informou `100% tests passed, 0 tests failed out of 115`. Os oito testes adicionais cobrem round-trip com framing, limites de padding, payload vazio, sequências inválidas ou inesperadas, compressão, corpo malformado e padding inválido.
+O bit alto da palavra de sequência sinaliza compressão. Validação externa de 2026-09-23: o responsável informou `100% tests passed, 0 tests failed out of 115`. Os oito testes adicionais cobrem round-trip com framing, limites de padding, payload vazio, sequências inválidas ou inesperadas, detecção de compressão, corpo malformado e padding inválido.
 
 ## Orquestração TCP do handshake
 
 O serviço de sessão do mundo conecta pelo transporte TCP limitado, acumula frames fragmentados, valida o desafio, monta e envia o login e somente então aceita frames de sessão XTEA com sequência iniciada em `1`. A primeira resposta válida muda o estado para ativo e publica apenas o payload já decifrado. Falhas de transporte, frame, desafio, montagem, envio e sessão possuem categorias próprias; mensagens de falha não incluem chave, sessão ou personagem.
 
-A chave XTEA é fornecida ao pedido de sessão, permitindo geração externa e testes determinísticos, mas nunca é emitida ou registrada pelo serviço. Validação externa de 2026-09-23: o responsável informou `100% tests passed, 0 tests failed out of 119`. Os quatro testes de integração locais cobrem handshake e primeiro payload, fragmentação do desafio, desafio inválido e recusa de início concorrente. Como compressão ainda é recusada, este incremento não declara entrada real no mundo.
+A chave XTEA é fornecida ao pedido de sessão, permitindo geração externa e testes determinísticos, mas nunca é emitida ou registrada pelo serviço. Validação externa de 2026-09-23: o responsável informou `100% tests passed, 0 tests failed out of 119`. Os quatro testes de integração locais cobrem handshake e primeiro payload, fragmentação do desafio, desafio inválido e recusa de início concorrente. Esse aceite isolado não declara entrada real no mundo.
+
+## Descompressão limitada da sessão
+
+Quando o bit alto da sequência está presente, o payload decifrado é tratado como um stream raw DEFLATE independente, igual ao produzido pelo servidor. Cada pacote reinicia o estado do zlib, precisa terminar exatamente no fim da entrada e pode expandir no máximo 65.500 bytes. Entrada vazia, stream truncado, dados residuais e expansão acima do limite são falhas explícitas; nenhum buffer de saída é dimensionado a partir de um tamanho remoto não confiável.
+
+Validação externa de 2026-09-23: o responsável informou `100% tests passed, 0 tests failed out of 124`. Os cinco novos testes unitários cobrem uma fixture raw DEFLATE conhecida, limite exato e excedido, truncamento, dados residuais e argumentos vazios ou inválidos. O teste existente de compressão do framing passou a confirmar descompressão e entrega do payload original.

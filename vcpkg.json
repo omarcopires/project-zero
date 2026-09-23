@@ -5,6 +5,7 @@
   "dependencies": [
     "fmt",
     "openssl",
+    "zlib",
     {
       "name": "qtbase",
       "default-features": false,

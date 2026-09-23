@@ -8,6 +8,7 @@
 
 #include <array>
 #include <cstddef>
+#include <string>
 #include <vector>
 
 namespace protocol::framing {
@@ -73,10 +74,36 @@ namespace protocol::framing {
 			EXPECT_EQ(decoded.sequence, 2);
 		}
 
-		TEST(ModernSessionCodec, RejectsCompressedIncomingPayload) {
-			auto body = encodedBody(payload(1));
-			body[3] |= std::byte { 0x80 };
-			EXPECT_EQ(decodeModernSessionBody(body, testKey, 1).status, ModernSessionStatus::CompressedPayloadUnsupported);
+		TEST(ModernSessionCodec, DecompressesCompressedIncomingPayload) {
+			const std::array<std::byte, 31> compressed {
+				std::byte { 0x4B }, std::byte { 0xCE }, std::byte { 0xCF }, std::byte { 0x2D },
+				std::byte { 0x28 }, std::byte { 0x4A }, std::byte { 0x2D }, std::byte { 0x2E },
+				std::byte { 0x4E }, std::byte { 0x4D }, std::byte { 0xD1 }, std::byte { 0x2D },
+				std::byte { 0x4E }, std::byte { 0x2D }, std::byte { 0x2E }, std::byte { 0xCE },
+				std::byte { 0xCC }, std::byte { 0xCF }, std::byte { 0xD3 }, std::byte { 0x2D },
+				std::byte { 0x48 }, std::byte { 0xAC }, std::byte { 0xCC }, std::byte { 0xC9 },
+				std::byte { 0x4F }, std::byte { 0x4C }, std::byte { 0x49 }, std::byte { 0x1E },
+				std::byte { 0x92 }, std::byte { 0x32 }, std::byte { 0x00 },
+			};
+			std::vector<std::byte> plaintext { std::byte { 0x00 } };
+			plaintext.insert(plaintext.end(), compressed.begin(), compressed.end());
+			const auto encrypted = crypto::encryptXtea(plaintext, testKey);
+			ASSERT_EQ(encrypted.status, crypto::XteaStatus::Ready);
+			std::vector<std::byte> body;
+			binary::appendU32(body, 0x80000001U);
+			body.insert(body.end(), encrypted.bytes.begin(), encrypted.bytes.end());
+
+			const auto decoded = decodeModernSessionBody(body, testKey, 1);
+			ASSERT_EQ(decoded.status, ModernSessionStatus::Ready);
+			const std::string unit = "compressed-session-payload";
+			const std::vector<std::byte> expectedUnit(
+				reinterpret_cast<const std::byte*>(unit.data()),
+				reinterpret_cast<const std::byte*>(unit.data() + unit.size()));
+			std::vector<std::byte> expected;
+			for (int repetition = 0; repetition < 8; ++repetition) {
+				expected.insert(expected.end(), expectedUnit.begin(), expectedUnit.end());
+			}
+			EXPECT_EQ(decoded.bytes, expected);
 		}
 
 		TEST(ModernSessionCodec, RejectsMalformedBody) {

@@ -1,6 +1,7 @@
 #include "protocol/framing/modern_session_codec.h"
 
 #include "protocol/binary/little_endian.h"
+#include "protocol/compression/raw_deflate.h"
 #include "protocol/framing/modern_frame.h"
 
 #include <cstddef>
@@ -13,6 +14,7 @@ namespace protocol::framing {
 		constexpr std::uint32_t maximumSequence = 0x7FFFFFFFU;
 		constexpr std::uint32_t compressionFlag = 0x80000000U;
 		constexpr std::size_t paddingHeaderSize = 1;
+		constexpr std::size_t maximumDecompressedPayloadSize = 65500;
 
 		bool validSequence(const std::uint32_t sequence) {
 			return sequence > 0 && sequence <= maximumSequence;
@@ -68,27 +70,34 @@ namespace protocol::framing {
 		}
 
 		const auto sequenceWord = binary::readU32(body).value();
-		if ((sequenceWord & compressionFlag) != 0) {
-			return { .status = ModernSessionStatus::CompressedPayloadUnsupported };
-		}
-		if (sequenceWord != expectedSequence) {
-			return { .status = ModernSessionStatus::UnexpectedSequence, .sequence = sequenceWord };
+		const auto compressed = (sequenceWord & compressionFlag) != 0;
+		const auto sequence = sequenceWord & maximumSequence;
+		if (sequence != expectedSequence) {
+			return { .status = ModernSessionStatus::UnexpectedSequence, .sequence = sequence };
 		}
 
 		auto decrypted = crypto::decryptXtea(body.subspan(modernFrameExtraBytes), key);
 		if (decrypted.status != crypto::XteaStatus::Ready) {
-			return { .status = ModernSessionStatus::EncryptionFailed, .sequence = sequenceWord };
+			return { .status = ModernSessionStatus::EncryptionFailed, .sequence = sequence };
 		}
 		const auto paddingSize = std::to_integer<std::size_t>(decrypted.bytes.front());
 		if (paddingSize >= modernFrameBlockSize || decrypted.bytes.size() <= paddingHeaderSize + paddingSize) {
-			return { .status = ModernSessionStatus::InvalidPadding, .sequence = sequenceWord };
+			return { .status = ModernSessionStatus::InvalidPadding, .sequence = sequence };
 		}
 
 		const auto payloadEnd = decrypted.bytes.end() - static_cast<std::ptrdiff_t>(paddingSize);
+		std::vector<std::byte> payload(decrypted.bytes.begin() + paddingHeaderSize, payloadEnd);
+		if (compressed) {
+			auto decompressed = compression::decompressRawDeflate(payload, maximumDecompressedPayloadSize);
+			if (decompressed.status != compression::RawDeflateStatus::Ready) {
+				return { .status = ModernSessionStatus::DecompressionFailed, .sequence = sequence };
+			}
+			payload = std::move(decompressed.bytes);
+		}
 		return {
 			.status = ModernSessionStatus::Ready,
-			.sequence = sequenceWord,
-			.bytes = std::vector<std::byte>(decrypted.bytes.begin() + paddingHeaderSize, payloadEnd),
+			.sequence = sequence,
+			.bytes = std::move(payload),
 		};
 	}
 

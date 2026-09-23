@@ -14,10 +14,10 @@ namespace protocol::framing {
 		EmptyPayload,
 		InvalidSequence,
 		UnexpectedSequence,
-		CompressedPayloadUnsupported,
 		InvalidBodySize,
 		InvalidPadding,
 		EncryptionFailed,
+		DecompressionFailed,
 		FrameEncodingFailed,
 	};
 

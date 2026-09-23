@@ -5,6 +5,7 @@ function(project_find_dependencies)
     find_package(fmt CONFIG REQUIRED)
     find_package(OpenSSL REQUIRED)
     find_package(spdlog CONFIG REQUIRED)
+    find_package(ZLIB REQUIRED)
 
     if(BUILD_TESTING)
         find_package(GTest CONFIG REQUIRED)
