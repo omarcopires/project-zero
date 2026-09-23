@@ -102,6 +102,20 @@ function(project_add_targets)
     set_target_properties(authentication_application PROPERTIES AUTOMOC ON)
 
     add_library(
+        world_session_application
+        STATIC
+            "${PROJECT_SOURCE_DIR}/client/src/application/world/world_session_service.cpp"
+    )
+    target_include_directories(
+        world_session_application
+        PUBLIC
+            "${PROJECT_SOURCE_DIR}/client/src"
+    )
+    target_link_libraries(world_session_application PUBLIC protocol transport Qt6::Core PRIVATE core)
+    project_apply_cpp_options(world_session_application)
+    set_target_properties(world_session_application PROPERTIES AUTOMOC ON)
+
+    add_library(
         logging
         STATIC
             "${PROJECT_SOURCE_DIR}/client/src/infrastructure/logging/logger.cpp"

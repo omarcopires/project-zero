@@ -132,4 +132,34 @@ function(project_add_tests)
             COMMAND authentication_integration_tests "${test_case}"
         )
     endforeach()
+
+    add_executable(
+        world_session_integration_tests
+        "${PROJECT_SOURCE_DIR}/client/tests/world_session_service_test.cpp"
+    )
+    target_link_libraries(
+        world_session_integration_tests
+        PRIVATE
+            world_session_application
+            protocol
+            Qt6::Core
+            Qt6::Network
+            Qt6::Test
+    )
+    project_apply_cpp_options(world_session_integration_tests)
+    set_target_properties(world_session_integration_tests PROPERTIES AUTOMOC ON)
+
+    foreach(
+        test_case
+        IN ITEMS
+            completesHandshakeAndPublishesFirstPayload
+            buffersFragmentedChallenge
+            rejectsMalformedChallenge
+            rejectsConcurrentStart
+    )
+        add_test(
+            NAME "world_session_integration.${test_case}"
+            COMMAND world_session_integration_tests "${test_case}"
+        )
+    endforeach()
 endfunction()
