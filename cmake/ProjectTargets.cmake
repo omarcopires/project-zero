@@ -40,6 +40,7 @@ function(project_add_targets)
         STATIC
             "${PROJECT_SOURCE_DIR}/client/src/session/authentication/authentication_coordinator.cpp"
             "${PROJECT_SOURCE_DIR}/client/src/session/authentication/login_codec.cpp"
+            "${PROJECT_SOURCE_DIR}/client/src/session/selection/character_selector.cpp"
     )
     target_include_directories(
         session

@@ -21,3 +21,9 @@ Validação externa de 2026-09-22: o responsável informou `100% tests passed, 0
 O adaptador de aplicação compõe codec, coordenador e transporte HTTP. Ele não registra corpo, credenciais ou sessão; publica somente mudanças de estado. Cancelamento encerra primeiro a tentativa no núcleo e depois aborta a operação HTTP, de modo que o callback de cancelamento não possa substituir o estado terminal. Os testes de integração usam exclusivamente credenciais e respostas sintéticas em loopback.
 
 Validação externa de 2026-09-22: após substituir uma macro GoogleTest usada por engano no harness Qt Test, o responsável informou `100% tests passed, 0 tests failed out of 67`. Os sete testes de integração adicionais cobrem sucesso sintético, credencial rejeitada por resposta HTTP, desafio não suportado, resposta incompatível, timeout, cancelamento e tentativa concorrente.
+
+## Seleção de personagem
+
+A seleção aceita somente um nome presente uma única vez na sessão autenticada e resolve exatamente um mundo pelo `worldId`. Mundo ausente ou duplicado e endpoint vazio ou sem porta são falhas explícitas. O destino resultante reúne personagem, mundo, host, porta e chave da sessão vigente para o futuro handshake TCP. Atualizar ou limpar a sessão invalida imediatamente qualquer seleção anterior.
+
+Validação externa de 2026-09-23: o responsável informou `100% tests passed, 0 tests failed out of 76`. Os nove testes adicionais cobrem ausência de sessão, seleção válida, personagem inexistente ou duplicado, mundo ausente ou duplicado, endpoint inválido e invalidação por troca ou falha de sessão.
