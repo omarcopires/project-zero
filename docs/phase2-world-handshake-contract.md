@@ -52,3 +52,9 @@ Validação externa de 2026-09-23: após remover a identidade do cliente de refe
 A transformação XTEA opera em blocos independentes de 8 bytes, com quatro palavras de chave de 32 bits, palavras little-endian e 32 rodadas. Entradas desalinhadas são rejeitadas; padding, sequência, checksum e envelope permanecem responsabilidades das camadas de sessão e framing. O módulo não gera chaves e não mantém estado global.
 
 Validação externa de 2026-09-23: o responsável informou `100% tests passed, 0 tests failed out of 107`. Os quatro testes adicionais cobrem vetores conhecidos de cifragem e decifragem, múltiplos blocos com round-trip e rejeição de entrada desalinhada. A primitiva ainda não foi ativada no transporte.
+
+## Framing criptografado da sessão
+
+Após o login, um pacote de saída recebe sequência entre `1` e `0x7FFFFFFF`, byte frontal com o tamanho do padding, padding traseiro até múltiplo de 8 e cifragem XTEA. A sequência permanece fora da área cifrada e o conjunto é envolvido pelo frame moderno. Na entrada, o decoder exige a sequência esperada, decifra somente a região XTEA e remove o padding validado. Sequência zero, desalinhamento, padding inválido e salto de sequência são falhas explícitas.
+
+O bit alto da palavra de sequência sinaliza compressão. Pacotes assim são reconhecidos, mas recusados como não suportados até que a descompressão limitada seja implementada; eles não são interpretados como payload comum. Validação externa de 2026-09-23: o responsável informou `100% tests passed, 0 tests failed out of 115`. Os oito testes adicionais cobrem round-trip com framing, limites de padding, payload vazio, sequências inválidas ou inesperadas, compressão, corpo malformado e padding inválido.

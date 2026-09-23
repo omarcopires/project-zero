@@ -21,6 +21,7 @@ function(project_add_targets)
             "${PROJECT_SOURCE_DIR}/client/src/protocol/handshake/world_login_block_codec.cpp"
             "${PROJECT_SOURCE_DIR}/client/src/protocol/handshake/world_login_packet_codec.cpp"
             "${PROJECT_SOURCE_DIR}/client/src/protocol/framing/modern_frame.cpp"
+            "${PROJECT_SOURCE_DIR}/client/src/protocol/framing/modern_session_codec.cpp"
     )
     target_include_directories(
         protocol
