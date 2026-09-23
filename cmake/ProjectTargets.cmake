@@ -15,6 +15,7 @@ function(project_add_targets)
             "${PROJECT_SOURCE_DIR}/client/src/protocol/binary/adler32.cpp"
             "${PROJECT_SOURCE_DIR}/client/src/protocol/binary/length_prefixed_string.cpp"
             "${PROJECT_SOURCE_DIR}/client/src/protocol/binary/little_endian.cpp"
+            "${PROJECT_SOURCE_DIR}/client/src/protocol/crypto/raw_rsa.cpp"
             "${PROJECT_SOURCE_DIR}/client/src/protocol/handshake/world_challenge_codec.cpp"
             "${PROJECT_SOURCE_DIR}/client/src/protocol/handshake/world_login_block_codec.cpp"
             "${PROJECT_SOURCE_DIR}/client/src/protocol/framing/modern_frame.cpp"
@@ -24,7 +25,7 @@ function(project_add_targets)
         PUBLIC
             "${PROJECT_SOURCE_DIR}/client/src"
     )
-    target_link_libraries(protocol PRIVATE core)
+    target_link_libraries(protocol PRIVATE core OpenSSL::Crypto)
     project_apply_cpp_options(protocol)
 
     add_library(

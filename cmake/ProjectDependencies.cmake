@@ -3,6 +3,7 @@ include_guard(GLOBAL)
 function(project_find_dependencies)
     find_package(Qt6 6.11.1 EXACT REQUIRED COMPONENTS Core Network Test)
     find_package(fmt CONFIG REQUIRED)
+    find_package(OpenSSL REQUIRED)
     find_package(spdlog CONFIG REQUIRED)
 
     if(BUILD_TESTING)

@@ -34,3 +34,9 @@ Validação externa de 2026-09-23: após a extração do catálogo e das primiti
 O encoder monta exatamente 128 bytes antes da criptografia: zero inicial, quatro palavras XTEA little-endian, flag GM desabilitada, chave de sessão e personagem como strings `u16 + bytes`, timestamp, byte aleatório, probe `OTCv8`, versão 1525 e padding zero. O primeiro incremento inclui somente campos efetivamente consumidos pelo servidor atual; extensões do cliente de referência que o parser atual não consome não são inventadas. Entradas vazias, strings não representáveis e payload maior que o bloco são rejeitados.
 
 Validação externa de 2026-09-23: o responsável informou `100% tests passed, 0 tests failed out of 93`. Os sete testes adicionais cobrem string com prefixo `u16`, layout completo do bloco, campos obrigatórios vazios, comprimento de string não representável, excesso do bloco RSA e preenchimento do limite exato de 128 bytes.
+
+## Criptografia RSA bruta
+
+O bloco completo é interpretado como inteiro big-endian e elevado ao expoente público `65537` módulo a chave OpenTibia de 1024 bits, sem padding, em conformidade com o cliente e o servidor fixados acima. A operação usa diretamente o componente criptográfico OpenSSL, agora declarado como dependência do projeto, e nunca recebe a chave privada. Tamanho diferente de 128 bytes, chave pública inválida e mensagem maior ou igual ao módulo são falhas explícitas.
+
+Validação externa de 2026-09-23: o responsável informou `100% tests passed, 0 tests failed out of 98`. Os cinco testes adicionais cobrem vetor OpenTibia conhecido, identidade matemática para o valor um, tamanho incorreto, chave/expoente inválidos e mensagem fora do módulo. A criptografia ainda não está acoplada à montagem do pacote nem ao transporte.
