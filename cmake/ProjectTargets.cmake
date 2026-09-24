@@ -34,13 +34,14 @@ function(project_add_targets)
         appearance_catalog
         STATIC
             "${PROJECT_SOURCE_DIR}/client/src/assets/appearance_catalog.cpp"
+            "${PROJECT_SOURCE_DIR}/client/src/assets/appearance_catalog_loader.cpp"
     )
     target_include_directories(
         appearance_catalog
         PUBLIC
             "${PROJECT_SOURCE_DIR}/client/src"
     )
-    target_link_libraries(appearance_catalog PUBLIC appearance_proto PRIVATE core)
+    target_link_libraries(appearance_catalog PUBLIC appearance_proto Qt6::Core PRIVATE core)
     project_apply_cpp_options(appearance_catalog)
 
     add_library(
