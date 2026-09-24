@@ -10,6 +10,9 @@ namespace application::world {
 		LoginEncodingFailed,
 		LoginSendFailed,
 		InvalidSessionPacket,
+		ServerRejected,
+		UpdateRequired,
+		LoginTokenRejected,
 	};
 
 }

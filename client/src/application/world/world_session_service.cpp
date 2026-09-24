@@ -2,6 +2,7 @@
 
 #include "protocol/framing/modern_frame.h"
 #include "protocol/framing/modern_session_codec.h"
+#include "protocol/game/initial_world_response_codec.h"
 #include "protocol/handshake/world_challenge_codec.h"
 #include "protocol/handshake/world_login_packet_codec.h"
 
@@ -88,7 +89,8 @@ namespace application::world {
 	}
 
 	void WorldSessionService::handleDisconnected() {
-		if (m_state != WorldSessionState::Failed && m_state != WorldSessionState::Closed) {
+		if (m_state != WorldSessionState::Failed && m_state != WorldSessionState::Closed
+		    && m_state != WorldSessionState::Waiting) {
 			setState(WorldSessionState::Closed);
 		}
 	}
@@ -141,7 +143,9 @@ namespace application::world {
 	}
 
 	bool WorldSessionService::processSessionPacket(const std::span<const std::byte> body) {
-		if (m_state != WorldSessionState::AwaitingSessionPacket && m_state != WorldSessionState::Active) {
+		if (m_state != WorldSessionState::AwaitingSessionPacket
+		    && m_state != WorldSessionState::LoginAccepted
+		    && m_state != WorldSessionState::Active) {
 			fail(WorldSessionError::InvalidFrame, QStringLiteral("World frame arrived in an invalid state"));
 			return false;
 		}
@@ -152,8 +156,50 @@ namespace application::world {
 		}
 
 		m_expectedIncomingSequence = m_expectedIncomingSequence == maximumSequence ? 1 : m_expectedIncomingSequence + 1;
-		setState(WorldSessionState::Active);
-		emit sessionPayloadReceived(toByteArray(decoded.bytes));
+		const auto payload = toByteArray(decoded.bytes);
+		if (m_state != WorldSessionState::AwaitingSessionPacket) {
+			emit sessionPayloadReceived(payload);
+			return true;
+		}
+
+		const auto response = protocol::game::decodeInitialWorldResponse(decoded.bytes);
+		if (response.status != protocol::game::InitialWorldResponseStatus::Ready) {
+			fail(WorldSessionError::InvalidSessionPacket, QStringLiteral("Initial world response is invalid or unsupported"));
+			return false;
+		}
+
+		switch (response.kind) {
+			case protocol::game::InitialWorldResponseKind::LoginSuccess:
+				setState(WorldSessionState::LoginAccepted);
+				emit loginAccepted(response.playerId, response.serverBeat);
+				break;
+			case protocol::game::InitialWorldResponseKind::Pending:
+				setState(WorldSessionState::LoginAccepted);
+				break;
+			case protocol::game::InitialWorldResponseKind::EnterWorld:
+				setState(WorldSessionState::Active);
+				break;
+			case protocol::game::InitialWorldResponseKind::LoginAdvice:
+				emit loginAdviceReceived(QString::fromStdString(response.message));
+				break;
+			case protocol::game::InitialWorldResponseKind::LoginWait:
+				setState(WorldSessionState::Waiting);
+				emit loginWaitReceived(QString::fromStdString(response.message), response.waitSeconds);
+				break;
+			case protocol::game::InitialWorldResponseKind::LoginError:
+				fail(WorldSessionError::ServerRejected, QString::fromStdString(response.message));
+				return false;
+			case protocol::game::InitialWorldResponseKind::UpdateNeeded:
+				fail(WorldSessionError::UpdateRequired, QString::fromStdString(response.message));
+				return false;
+			case protocol::game::InitialWorldResponseKind::LoginToken:
+				if (!response.tokenAccepted) {
+					fail(WorldSessionError::LoginTokenRejected, QStringLiteral("World login token was rejected"));
+					return false;
+				}
+				break;
+		}
+		emit sessionPayloadReceived(payload);
 		return true;
 	}
 

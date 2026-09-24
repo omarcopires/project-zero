@@ -7,6 +7,8 @@ namespace application::world {
 		Connecting,
 		AwaitingChallenge,
 		AwaitingSessionPacket,
+		LoginAccepted,
+		Waiting,
 		Active,
 		Failed,
 		Closed,

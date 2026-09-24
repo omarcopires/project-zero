@@ -33,6 +33,9 @@ namespace application::world {
 	signals:
 		void stateChanged(application::world::WorldSessionState state);
 		void sessionPayloadReceived(const QByteArray &payload);
+		void loginAccepted(std::uint32_t playerId, std::uint16_t serverBeat);
+		void loginAdviceReceived(const QString &message);
+		void loginWaitReceived(const QString &message, std::uint8_t retrySeconds);
 		void failureOccurred(const application::world::WorldSessionFailure &failure);
 
 	private:

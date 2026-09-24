@@ -1,6 +1,7 @@
 #include "application/world/world_session_service.h"
 
 #include "protocol/binary/adler32.h"
+#include "protocol/binary/length_prefixed_string.h"
 #include "protocol/binary/little_endian.h"
 #include "protocol/constants/world_handshake_constants.h"
 #include "protocol/framing/modern_frame.h"
@@ -73,6 +74,23 @@ namespace {
 		return qvariant_cast<WorldSessionFailure>(spy.first().first());
 	}
 
+	std::vector<std::byte> loginSuccessPayload() {
+		std::vector<std::byte> payload { std::byte { 0x17 } };
+		protocol::binary::appendU32(payload, 0x12345678U);
+		protocol::binary::appendU16(payload, 50);
+		for (int index = 0; index < 3; ++index) {
+			payload.push_back(std::byte { 3 });
+			protocol::binary::appendU32(payload, 0x80000000U);
+		}
+		payload.push_back(std::byte { 1 });
+		payload.push_back(std::byte { 0 });
+		const auto appended = protocol::binary::appendStringU16(payload, "https://store.invalid");
+		Q_ASSERT(appended);
+		protocol::binary::appendU16(payload, 25);
+		payload.push_back(std::byte { 1 });
+		return payload;
+	}
+
 }
 
 void WorldSessionServiceTest::completesHandshakeAndPublishesFirstPayload() {
@@ -80,6 +98,7 @@ void WorldSessionServiceTest::completesHandshakeAndPublishesFirstPayload() {
 	QVERIFY(server.listen(QHostAddress::LocalHost));
 	WorldSessionService service;
 	QSignalSpy payloadSpy(&service, &WorldSessionService::sessionPayloadReceived);
+	QSignalSpy acceptedSpy(&service, &WorldSessionService::loginAccepted);
 	QSignalSpy failureSpy(&service, &WorldSessionService::failureOccurred);
 	QVERIFY(service.start(requestFor(server)));
 
@@ -97,7 +116,7 @@ void WorldSessionServiceTest::completesHandshakeAndPublishesFirstPayload() {
 	QCOMPARE(loginFrame.status, protocol::framing::FrameDecodeStatus::FrameReady);
 	QCOMPARE(loginFrame.bytesConsumed, static_cast<std::size_t>(loginBytes.size()));
 
-	const std::vector<std::byte> firstPayload { std::byte { 0xAA }, std::byte { 0xBB } };
+	const auto firstPayload = loginSuccessPayload();
 	const auto firstPacket = protocol::framing::encodeModernSessionPacket(firstPayload, sessionKey, 1);
 	QCOMPARE(firstPacket.status, protocol::framing::ModernSessionStatus::Ready);
 	const auto firstPacketBytes = toByteArray(firstPacket.bytes);
@@ -105,8 +124,11 @@ void WorldSessionServiceTest::completesHandshakeAndPublishesFirstPayload() {
 	QVERIFY(peer->waitForBytesWritten());
 
 	QTRY_COMPARE(payloadSpy.count(), 1);
-	QCOMPARE(service.state(), WorldSessionState::Active);
-	QCOMPARE(payloadSpy.first().first().toByteArray(), QByteArray::fromHex("aabb"));
+	QCOMPARE(service.state(), WorldSessionState::LoginAccepted);
+	QCOMPARE(payloadSpy.first().first().toByteArray(), toByteArray(firstPayload));
+	QCOMPARE(acceptedSpy.count(), 1);
+	QCOMPARE(acceptedSpy.first().at(0).toUInt(), 0x12345678U);
+	QCOMPARE(acceptedSpy.first().at(1).toUInt(), 50U);
 	QCOMPARE(failureSpy.count(), 0);
 }
 

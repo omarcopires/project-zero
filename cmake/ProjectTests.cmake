@@ -7,6 +7,7 @@ function(project_add_tests)
         "${PROJECT_SOURCE_DIR}/client/tests/bootstrap_test.cpp"
         "${PROJECT_SOURCE_DIR}/client/tests/character_selector_test.cpp"
         "${PROJECT_SOURCE_DIR}/client/tests/fixture_inspector_test.cpp"
+        "${PROJECT_SOURCE_DIR}/client/tests/initial_world_response_codec_test.cpp"
         "${PROJECT_SOURCE_DIR}/client/tests/logger_test.cpp"
         "${PROJECT_SOURCE_DIR}/client/tests/login_codec_test.cpp"
         "${PROJECT_SOURCE_DIR}/client/tests/message_formatter_test.cpp"
