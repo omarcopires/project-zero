@@ -12,7 +12,6 @@ namespace application::world {
 		InvalidSessionPacket,
 		ServerRejected,
 		UpdateRequired,
-		LoginTokenRejected,
 	};
 
 }

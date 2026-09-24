@@ -36,6 +36,7 @@ namespace application::world {
 		void loginAccepted(std::uint32_t playerId, std::uint16_t serverBeat);
 		void loginAdviceReceived(const QString &message);
 		void loginWaitReceived(const QString &message, std::uint8_t retrySeconds);
+		void sessionEnded(std::uint8_t reason);
 		void failureOccurred(const application::world::WorldSessionFailure &failure);
 
 	private:

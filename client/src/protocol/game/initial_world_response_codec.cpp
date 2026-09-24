@@ -1,20 +1,13 @@
 #include "protocol/game/initial_world_response_codec.h"
 
 #include "protocol/binary/little_endian.h"
+#include "protocol/game/game_server_opcode.h"
 
 #include <cstdint>
 
 namespace protocol::game {
 	namespace {
 
-		constexpr std::uint8_t pendingOpcode = 0x0A;
-		constexpr std::uint8_t enterWorldOpcode = 0x0F;
-		constexpr std::uint8_t updateNeededOpcode = 0x11;
-		constexpr std::uint8_t loginErrorOpcode = 0x14;
-		constexpr std::uint8_t loginAdviceOpcode = 0x15;
-		constexpr std::uint8_t loginWaitOpcode = 0x16;
-		constexpr std::uint8_t loginSuccessOpcode = 0x17;
-		constexpr std::uint8_t loginTokenOpcode = 0x18;
 		constexpr std::size_t encodedDoubleSize = 5;
 
 		bool readString(const std::span<const std::byte> payload, std::size_t &offset, std::string &value) {
@@ -25,6 +18,22 @@ namespace protocol::game {
 			offset += sizeof(std::uint16_t);
 			value.assign(reinterpret_cast<const char*>(payload.data() + offset), *length);
 			offset += *length;
+			return true;
+		}
+
+		bool skipStringList(const std::span<const std::byte> payload, std::size_t &offset) {
+			const auto count = binary::readU16(payload, offset);
+			if (!count) {
+				return false;
+			}
+			offset += sizeof(std::uint16_t);
+			for (std::uint16_t index = 0; index < *count; ++index) {
+				const auto length = binary::readU16(payload, offset);
+				if (!length || offset + sizeof(std::uint16_t) + *length > payload.size()) {
+					return false;
+				}
+				offset += sizeof(std::uint16_t) + *length;
+			}
 			return true;
 		}
 
@@ -54,38 +63,66 @@ namespace protocol::game {
 			return {};
 		}
 
-		const auto opcode = std::to_integer<std::uint8_t>(payload.front());
-		if (opcode == pendingOpcode || opcode == enterWorldOpcode) {
+		const auto opcode = static_cast<GameServerOpcode>(std::to_integer<std::uint8_t>(payload.front()));
+		if (opcode == GameServerOpcode::PendingState || opcode == GameServerOpcode::EnterWorld) {
 			return {
 				.status = InitialWorldResponseStatus::Ready,
-				.kind = opcode == pendingOpcode ? InitialWorldResponseKind::Pending : InitialWorldResponseKind::EnterWorld,
+				.kind = opcode == GameServerOpcode::PendingState ? InitialWorldResponseKind::Pending : InitialWorldResponseKind::EnterWorld,
 				.bytesConsumed = 1,
 			};
 		}
-		if (opcode == updateNeededOpcode) {
+		if (opcode == GameServerOpcode::UpdateNeeded) {
 			return messageResponse(payload, InitialWorldResponseKind::UpdateNeeded, false);
 		}
-		if (opcode == loginErrorOpcode) {
+		if (opcode == GameServerOpcode::LoginError) {
 			return messageResponse(payload, InitialWorldResponseKind::LoginError, false);
 		}
-		if (opcode == loginAdviceOpcode) {
+		if (opcode == GameServerOpcode::LoginAdvice) {
 			return messageResponse(payload, InitialWorldResponseKind::LoginAdvice, false);
 		}
-		if (opcode == loginWaitOpcode) {
+		if (opcode == GameServerOpcode::LoginWait) {
 			return messageResponse(payload, InitialWorldResponseKind::LoginWait, true);
 		}
-		if (opcode == loginTokenOpcode) {
+		if (opcode == GameServerOpcode::SessionEnd) {
 			if (payload.size() < 2) {
-				return { .status = InitialWorldResponseStatus::Truncated, .kind = InitialWorldResponseKind::LoginToken };
+				return { .status = InitialWorldResponseStatus::Truncated, .kind = InitialWorldResponseKind::SessionEnd };
 			}
 			return {
 				.status = InitialWorldResponseStatus::Ready,
-				.kind = InitialWorldResponseKind::LoginToken,
+				.kind = InitialWorldResponseKind::SessionEnd,
 				.bytesConsumed = 2,
-				.tokenAccepted = std::to_integer<std::uint8_t>(payload[1]) != 0,
+				.sessionEndReason = std::to_integer<std::uint8_t>(payload[1]),
 			};
 		}
-		if (opcode != loginSuccessOpcode) {
+		if (opcode == GameServerOpcode::AllowBugReport || opcode == GameServerOpcode::ServerTime) {
+			const std::size_t dataSize = opcode == GameServerOpcode::AllowBugReport ? 1 : 2;
+			if (payload.size() < 1 + dataSize) {
+				return { .status = InitialWorldResponseStatus::Truncated, .kind = InitialWorldResponseKind::Auxiliary };
+			}
+			return {
+				.status = InitialWorldResponseStatus::Ready,
+				.kind = InitialWorldResponseKind::Auxiliary,
+				.bytesConsumed = 1 + dataSize,
+			};
+		}
+		if (opcode == GameServerOpcode::ExivaRestrictions) {
+			std::size_t offset = 1;
+			if (payload.size() - offset < 6) {
+				return { .status = InitialWorldResponseStatus::Truncated, .kind = InitialWorldResponseKind::Auxiliary };
+			}
+			offset += 6;
+			for (int listIndex = 0; listIndex < 4; ++listIndex) {
+				if (!skipStringList(payload, offset)) {
+					return { .status = InitialWorldResponseStatus::Truncated, .kind = InitialWorldResponseKind::Auxiliary };
+				}
+			}
+			return {
+				.status = InitialWorldResponseStatus::Ready,
+				.kind = InitialWorldResponseKind::Auxiliary,
+				.bytesConsumed = offset,
+			};
+		}
+		if (opcode != GameServerOpcode::LoginSuccess) {
 			return { .status = InitialWorldResponseStatus::UnsupportedOpcode };
 		}
 

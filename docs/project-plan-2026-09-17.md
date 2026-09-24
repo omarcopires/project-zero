@@ -1,6 +1,6 @@
 # Plano do novo cliente
 
-Data-base: 2026-09-17. Estado atualizado em 2026-09-22: plano-base aprovado; Fase 0 documental concluída com ressalvas; bootstrap da Fase 1 em andamento, compilado e validado externamente. Este documento consolida o planejamento, a preservação integral do frontend original e os gates técnicos explícitos.
+Data-base: 2026-09-17. Estado atualizado em 2026-09-24: plano-base aprovado; Fase 0 documental concluída com ressalvas; Fase 1 validada externamente; Fase 2 de protocolo e sessão em andamento. Este documento consolida o planejamento, a preservação integral do frontend original e os gates técnicos explícitos.
 
 ## 1. Decisões confirmadas
 
@@ -237,7 +237,7 @@ Fora do MVP: versões antigas/futuras, serviços oficiais, loja/pagamentos, cria
 
 ## 8. Próximos passos e estado real
 
-Atividade de engenharia atual: Fase 2 em andamento pelos contratos de [autenticação](phase2-authentication-contract.md) e [handshake do mundo](phase2-world-handshake-contract.md), com pacote completo de login do mundo, identidade independente, versão única, primitiva XTEA, framing criptografado, orquestração TCP e descompressão limitada validados em 124/124 testes. A Fase 1 foi concluída no ambiente do responsável, com reprodutibilidade em máquina limpa ainda pendente conforme o [registro de aceite](phase1-acceptance.md). O código atual ainda rejeita desafios TOTP como não suportados e não interpreta semanticamente os opcodes do mundo; por isso ainda não comprova entrada funcional no jogo. Gates de assets e integração visual permanecem explícitos.
+Atividade de engenharia atual: Fase 2 em andamento pelos contratos de [autenticação](phase2-authentication-contract.md) e [handshake do mundo](phase2-world-handshake-contract.md). O responsável validou com 132/132 testes o reconhecimento das respostas iniciais, encerramento `0x18` e reentrada após fila. Uma implementação posterior percorre a sequência de mensagens auxiliares e detecta `0x0F` mesmo no payload combinado; essa mudança aguarda validação externa. O mapa ainda é publicado bruto, sem interpretação ou estado carregado. A Fase 1 foi concluída no ambiente do responsável, com reprodutibilidade em máquina limpa ainda pendente conforme o [registro de aceite](phase1-acceptance.md). O código atual ainda rejeita desafios TOTP como não suportados. Gates de estado de mundo, assets e integração visual permanecem explícitos.
 
 Foram inspecionados fontes e recursos, verificados catálogo/hashes e produzidos documentos/regras. O resultado de 43/43 cobre apenas o bootstrap headless e seus componentes já implementados; ainda não demonstra compatibilidade operacional completa do novo cliente. Nenhum backend funcional foi encontrado nos recursos e nenhuma limpeza deles é recomendada.
 

@@ -85,14 +85,14 @@ namespace protocol::game {
 			EXPECT_EQ(decodeInitialWorldResponse(messagePayload(0x15, "Notice")).kind, InitialWorldResponseKind::LoginAdvice);
 		}
 
-		TEST(InitialWorldResponseCodec, DecodesLoginTokenResult) {
+		TEST(InitialWorldResponseCodec, DecodesSessionEndInformation) {
 			const std::vector<std::byte> payload { std::byte { 0x18 }, std::byte { 1 } };
 
 			const auto result = decodeInitialWorldResponse(payload);
 
 			EXPECT_EQ(result.status, InitialWorldResponseStatus::Ready);
-			EXPECT_EQ(result.kind, InitialWorldResponseKind::LoginToken);
-			EXPECT_TRUE(result.tokenAccepted);
+			EXPECT_EQ(result.kind, InitialWorldResponseKind::SessionEnd);
+			EXPECT_EQ(result.sessionEndReason, 1);
 		}
 
 		TEST(InitialWorldResponseCodec, RejectsTruncatedPayloads) {
