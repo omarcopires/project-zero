@@ -9,6 +9,40 @@ function(project_add_targets)
             "${PROJECT_SOURCE_DIR}/client/src"
     )
 
+    add_library(appearance_proto STATIC)
+    target_sources(
+        appearance_proto
+        PRIVATE
+            "${PROJECT_SOURCE_DIR}/client/protobuf/shared.proto"
+            "${PROJECT_SOURCE_DIR}/client/protobuf/appearances.proto"
+    )
+    protobuf_generate(
+        TARGET appearance_proto
+        LANGUAGE cpp
+        IMPORT_DIRS "${PROJECT_SOURCE_DIR}/client/protobuf"
+        PROTOC_OUT_DIR "${PROJECT_BINARY_DIR}/generated/protobuf"
+    )
+    target_include_directories(
+        appearance_proto
+        PUBLIC
+            "${PROJECT_BINARY_DIR}/generated/protobuf"
+    )
+    target_link_libraries(appearance_proto PUBLIC protobuf::libprotobuf)
+    project_apply_cpp_options(appearance_proto)
+
+    add_library(
+        appearance_catalog
+        STATIC
+            "${PROJECT_SOURCE_DIR}/client/src/assets/appearance_catalog.cpp"
+    )
+    target_include_directories(
+        appearance_catalog
+        PUBLIC
+            "${PROJECT_SOURCE_DIR}/client/src"
+    )
+    target_link_libraries(appearance_catalog PUBLIC appearance_proto PRIVATE core)
+    project_apply_cpp_options(appearance_catalog)
+
     add_library(
         protocol
         STATIC
@@ -25,6 +59,7 @@ function(project_add_targets)
             "${PROJECT_SOURCE_DIR}/client/src/protocol/framing/modern_session_codec.cpp"
             "${PROJECT_SOURCE_DIR}/client/src/protocol/game/initial_world_response_codec.cpp"
             "${PROJECT_SOURCE_DIR}/client/src/protocol/game/map_description_header_codec.cpp"
+            "${PROJECT_SOURCE_DIR}/client/src/protocol/game/map_tile_terminator_codec.cpp"
     )
     target_include_directories(
         protocol
