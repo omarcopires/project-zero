@@ -10,6 +10,7 @@ function(project_add_tests)
         "${PROJECT_SOURCE_DIR}/client/tests/initial_world_response_codec_test.cpp"
         "${PROJECT_SOURCE_DIR}/client/tests/logger_test.cpp"
         "${PROJECT_SOURCE_DIR}/client/tests/login_codec_test.cpp"
+        "${PROJECT_SOURCE_DIR}/client/tests/map_description_codec_test.cpp"
         "${PROJECT_SOURCE_DIR}/client/tests/message_formatter_test.cpp"
         "${PROJECT_SOURCE_DIR}/client/tests/modern_frame_test.cpp"
         "${PROJECT_SOURCE_DIR}/client/tests/modern_session_codec_test.cpp"

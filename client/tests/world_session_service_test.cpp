@@ -1,5 +1,6 @@
 #include "application/world/world_session_service.h"
 
+#include "assets/appearance_catalog.h"
 #include "protocol/binary/adler32.h"
 #include "protocol/binary/length_prefixed_string.h"
 #include "protocol/binary/little_endian.h"
@@ -15,6 +16,7 @@
 
 #include <chrono>
 #include <cstddef>
+#include <memory>
 #include <span>
 #include <vector>
 
@@ -91,15 +93,33 @@ namespace {
 		return payload;
 	}
 
+	std::vector<std::byte> emptySurfaceMapDescription() {
+		constexpr std::size_t tileCount = 18 * 14 * 8;
+		std::vector<std::byte> payload { std::byte { 0x64 } };
+		protocol::binary::appendU16(payload, 200);
+		protocol::binary::appendU16(payload, 200);
+		payload.push_back(std::byte { 7 });
+
+		auto remaining = tileCount;
+		while (remaining > 256) {
+			protocol::binary::appendU16(payload, 0xFFFF);
+			remaining -= 256;
+		}
+		protocol::binary::appendU16(payload, static_cast<std::uint16_t>(0xFF00U | (remaining - 1)));
+		return payload;
+	}
+
 }
 
 void WorldSessionServiceTest::completesHandshakeAndPublishesFirstPayload() {
 	QTcpServer server;
 	QVERIFY(server.listen(QHostAddress::LocalHost));
-	WorldSessionService service;
+	WorldSessionService service(std::make_shared<const assets::AppearanceCatalog>(), nullptr);
 	QSignalSpy payloadSpy(&service, &WorldSessionService::sessionPayloadReceived);
 	QSignalSpy acceptedSpy(&service, &WorldSessionService::loginAccepted);
 	QSignalSpy failureSpy(&service, &WorldSessionService::failureOccurred);
+	QSignalSpy mapPositionSpy(&service, &WorldSessionService::initialMapPositionReceived);
+	QSignalSpy mapDescriptionSpy(&service, &WorldSessionService::initialMapDescriptionReceived);
 	QVERIFY(service.start(requestFor(server)));
 
 	QTRY_VERIFY(server.hasPendingConnections());
@@ -129,6 +149,25 @@ void WorldSessionServiceTest::completesHandshakeAndPublishesFirstPayload() {
 	QCOMPARE(acceptedSpy.count(), 1);
 	QCOMPARE(acceptedSpy.first().at(0).toUInt(), 0x12345678U);
 	QCOMPARE(acceptedSpy.first().at(1).toUInt(), 50U);
+	QCOMPARE(failureSpy.count(), 0);
+
+	std::vector<std::byte> enterWorldPayload { std::byte { 0x0F } };
+	const auto mapDescription = emptySurfaceMapDescription();
+	enterWorldPayload.insert(enterWorldPayload.end(), mapDescription.begin(), mapDescription.end());
+	const auto enterWorldPacket = protocol::framing::encodeModernSessionPacket(enterWorldPayload, sessionKey, 2);
+	QCOMPARE(enterWorldPacket.status, protocol::framing::ModernSessionStatus::Ready);
+	const auto enterWorldPacketBytes = toByteArray(enterWorldPacket.bytes);
+	QCOMPARE(peer->write(enterWorldPacketBytes), static_cast<qint64>(enterWorldPacketBytes.size()));
+	QVERIFY(peer->waitForBytesWritten());
+
+	QTRY_COMPARE(mapDescriptionSpy.count(), 1);
+	QCOMPARE(service.state(), WorldSessionState::Active);
+	QCOMPARE(mapPositionSpy.count(), 1);
+	QCOMPARE(mapPositionSpy.first().at(0).toUInt(), 200U);
+	const auto decodedMap = qvariant_cast<protocol::game::MapDescription>(mapDescriptionSpy.first().first());
+	QCOMPARE(decodedMap.center.floor, 7);
+	QVERIFY(decodedMap.occupiedTiles.empty());
+	QCOMPARE(decodedMap.bytesConsumed, mapDescription.size());
 	QCOMPARE(failureSpy.count(), 0);
 }
 

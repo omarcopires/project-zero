@@ -60,6 +60,7 @@ function(project_add_targets)
             "${PROJECT_SOURCE_DIR}/client/src/protocol/framing/modern_session_codec.cpp"
             "${PROJECT_SOURCE_DIR}/client/src/protocol/game/initial_world_response_codec.cpp"
             "${PROJECT_SOURCE_DIR}/client/src/protocol/game/map_description_header_codec.cpp"
+            "${PROJECT_SOURCE_DIR}/client/src/protocol/game/map_description_codec.cpp"
             "${PROJECT_SOURCE_DIR}/client/src/protocol/game/map_tile_terminator_codec.cpp"
     )
     target_include_directories(
@@ -150,7 +151,7 @@ function(project_add_targets)
         PUBLIC
             "${PROJECT_SOURCE_DIR}/client/src"
     )
-    target_link_libraries(world_session_application PUBLIC protocol transport Qt6::Core PRIVATE core)
+    target_link_libraries(world_session_application PUBLIC appearance_catalog protocol transport Qt6::Core PRIVATE core)
     project_apply_cpp_options(world_session_application)
     set_target_properties(world_session_application PROPERTIES AUTOMOC ON)
 

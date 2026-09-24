@@ -4,6 +4,7 @@
 #include "protocol/framing/modern_session_codec.h"
 #include "protocol/game/game_server_opcode.h"
 #include "protocol/game/initial_world_response_codec.h"
+#include "protocol/game/map_description_codec.h"
 #include "protocol/game/map_description_header_codec.h"
 #include "protocol/handshake/world_challenge_codec.h"
 #include "protocol/handshake/world_login_packet_codec.h"
@@ -32,10 +33,18 @@ namespace application::world {
 		qRegisterMetaType<WorldSessionState>();
 		qRegisterMetaType<WorldSessionError>();
 		qRegisterMetaType<WorldSessionFailure>();
+		qRegisterMetaType<protocol::game::MapDescription>();
 		connect(m_transport, &infrastructure::transport::TcpTransport::connected, this, &WorldSessionService::handleConnected);
 		connect(m_transport, &infrastructure::transport::TcpTransport::dataAvailable, this, &WorldSessionService::handleDataAvailable);
 		connect(m_transport, &infrastructure::transport::TcpTransport::failureOccurred, this, &WorldSessionService::handleTransportFailure);
 		connect(m_transport, &infrastructure::transport::TcpTransport::disconnected, this, &WorldSessionService::handleDisconnected);
+	}
+
+	WorldSessionService::WorldSessionService(
+		std::shared_ptr<const assets::AppearanceCatalog> appearanceCatalog,
+		QObject* parent) :
+		WorldSessionService(parent) {
+		m_appearanceCatalog = std::move(appearanceCatalog);
 	}
 
 	bool WorldSessionService::start(const WorldSessionRequest &request) {
@@ -262,6 +271,18 @@ namespace application::world {
 		if (!header) {
 			fail(WorldSessionError::InvalidSessionPacket, QStringLiteral("Initial map description header is invalid"));
 			return false;
+		}
+		if (m_appearanceCatalog) {
+			const auto decoded = protocol::game::decodeMapDescription(
+				payload,
+				[this](const assets::AppearanceKind kind, const std::uint32_t id) {
+					return m_appearanceCatalog->find(kind, id);
+				});
+			if (decoded.status != protocol::game::MapDescriptionDecodeStatus::Ready) {
+				fail(WorldSessionError::InvalidSessionPacket, QStringLiteral("Initial map tile data is invalid or unsupported"));
+				return false;
+			}
+			emit initialMapDescriptionReceived(decoded.description);
 		}
 		emit initialMapPositionReceived(header->center.x, header->center.y, header->center.floor);
 		return true;
