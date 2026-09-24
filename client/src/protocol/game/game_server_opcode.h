@@ -14,6 +14,7 @@ namespace protocol::game {
 		LoginSuccess = 0x17,
 		SessionEnd = 0x18,
 		AllowBugReport = 0x1A,
+		MapDescription = 0x64,
 		ExivaRestrictions = 0xCA,
 		ServerTime = 0xEF,
 	};

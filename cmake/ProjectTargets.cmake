@@ -24,6 +24,7 @@ function(project_add_targets)
             "${PROJECT_SOURCE_DIR}/client/src/protocol/framing/modern_frame.cpp"
             "${PROJECT_SOURCE_DIR}/client/src/protocol/framing/modern_session_codec.cpp"
             "${PROJECT_SOURCE_DIR}/client/src/protocol/game/initial_world_response_codec.cpp"
+            "${PROJECT_SOURCE_DIR}/client/src/protocol/game/map_description_header_codec.cpp"
     )
     target_include_directories(
         protocol

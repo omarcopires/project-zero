@@ -37,6 +37,7 @@ namespace application::world {
 		void loginAdviceReceived(const QString &message);
 		void loginWaitReceived(const QString &message, std::uint8_t retrySeconds);
 		void sessionEnded(std::uint8_t reason);
+		void initialMapPositionReceived(std::uint16_t x, std::uint16_t y, std::uint8_t floor);
 		void failureOccurred(const application::world::WorldSessionFailure &failure);
 
 	private:
@@ -47,6 +48,7 @@ namespace application::world {
 		void processInput();
 		bool processChallenge(std::span<const std::byte> body);
 		bool processSessionPacket(std::span<const std::byte> body);
+		bool processMapDescriptionHeader(std::span<const std::byte> payload);
 		void setState(WorldSessionState state);
 		void fail(WorldSessionError error, QString description);
 		bool requestIsValid(const WorldSessionRequest &request) const;

@@ -4,6 +4,7 @@
 #include "protocol/framing/modern_session_codec.h"
 #include "protocol/game/game_server_opcode.h"
 #include "protocol/game/initial_world_response_codec.h"
+#include "protocol/game/map_description_header_codec.h"
 #include "protocol/handshake/world_challenge_codec.h"
 #include "protocol/handshake/world_login_packet_codec.h"
 
@@ -163,6 +164,9 @@ namespace application::world {
 		const auto payload = toByteArray(decoded.bytes);
 		const auto response = protocol::game::decodeInitialWorldResponse(decoded.bytes);
 		if (m_state == WorldSessionState::Active) {
+			if (!processMapDescriptionHeader(decoded.bytes)) {
+				return false;
+			}
 			if (decoded.bytes.empty()
 			    || static_cast<protocol::game::GameServerOpcode>(std::to_integer<std::uint8_t>(decoded.bytes.front()))
 			        != protocol::game::GameServerOpcode::SessionEnd) {
@@ -236,10 +240,30 @@ namespace application::world {
 					break;
 			}
 			if (m_state == WorldSessionState::Active) {
+				if (offset < decoded.bytes.size()
+				    && !processMapDescriptionHeader(std::span<const std::byte>(decoded.bytes).subspan(offset))) {
+					return false;
+				}
 				break;
 			}
 		}
 		emit sessionPayloadReceived(payload);
+		return true;
+	}
+
+	bool WorldSessionService::processMapDescriptionHeader(const std::span<const std::byte> payload) {
+		if (payload.empty()
+		    || static_cast<protocol::game::GameServerOpcode>(std::to_integer<std::uint8_t>(payload.front()))
+		        != protocol::game::GameServerOpcode::MapDescription) {
+			return true;
+		}
+
+		const auto header = protocol::game::decodeMapDescriptionHeader(payload);
+		if (!header) {
+			fail(WorldSessionError::InvalidSessionPacket, QStringLiteral("Initial map description header is invalid"));
+			return false;
+		}
+		emit initialMapPositionReceived(header->center.x, header->center.y, header->center.floor);
 		return true;
 	}
 
