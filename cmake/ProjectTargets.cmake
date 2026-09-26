@@ -89,6 +89,24 @@ function(project_add_targets)
     project_apply_cpp_options(asset_compression)
 
     add_library(
+        sprite_sheet_assets
+        STATIC
+            "${PROJECT_SOURCE_DIR}/client/src/assets/sprite_sheet_loader.cpp"
+            "${PROJECT_SOURCE_DIR}/client/src/assets/sprite_sheet_loader.h"
+            "${PROJECT_SOURCE_DIR}/client/src/assets/sprite_sheet_type.h"
+            "${PROJECT_SOURCE_DIR}/client/src/assets/sprite_sheet_catalog_status.h"
+            "${PROJECT_SOURCE_DIR}/client/src/assets/sprite_sheet_image_result.h"
+            "${PROJECT_SOURCE_DIR}/client/src/assets/sprite_image_status.h"
+    )
+    target_include_directories(
+        sprite_sheet_assets
+        PUBLIC
+            "${PROJECT_SOURCE_DIR}/client/src"
+    )
+    target_link_libraries(sprite_sheet_assets PUBLIC asset_compression Qt6::Core Qt6::Gui)
+    project_apply_cpp_options(sprite_sheet_assets)
+
+    add_library(
         protocol
         STATIC
             "${PROJECT_SOURCE_DIR}/client/src/protocol/binary/adler32.cpp"
