@@ -1,5 +1,14 @@
 /out/
 /debug.log
+/*.exe
+/*.dll
+/*.pdb
+/*.ilk
+/*.exp
+/*.lib
+/qt.conf
+/plugins/
+/qml/
 /client/config/local.ini
 /.cache/
 /.vs/

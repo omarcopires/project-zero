@@ -2,10 +2,40 @@ include_guard(GLOBAL)
 
 function(project_add_tests)
     add_executable(
+        qml_integration_tests
+        "${PROJECT_SOURCE_DIR}/client/tests/qml_bootstrap_test.cpp"
+    )
+    project_attach_frontend_resources(qml_integration_tests)
+    target_link_libraries(
+        qml_integration_tests
+        PRIVATE
+            qml_enum_values
+            client_translations
+            Qt6::Gui
+            Qt6::Qml
+            Qt6::Quick
+            Qt6::QuickControls2
+            Qt6::Test
+    )
+    project_apply_cpp_options(qml_integration_tests)
+    set_target_properties(qml_integration_tests PROPERTIES AUTOMOC ON)
+    add_test(NAME qml_integration.loadsOriginalClientWindow COMMAND qml_integration_tests)
+    set_tests_properties(
+        qml_integration.loadsOriginalClientWindow
+        PROPERTIES
+            ENVIRONMENT
+                "QT_QPA_PLATFORM=minimal;QT_QPA_PLATFORM_PLUGIN_PATH=${Qt6Core_DIR}/../../Qt6/plugins/platforms;QT_PLUGIN_PATH=${Qt6Core_DIR}/../../Qt6/plugins;QML_IMPORT_PATH=${Qt6Core_DIR}/../../Qt6/qml"
+            ENVIRONMENT_MODIFICATION
+                "PATH=path_list_prepend:${Qt6Core_DIR}/../../bin"
+    )
+
+    add_executable(
         unit_tests
         "${PROJECT_SOURCE_DIR}/client/tests/authentication_coordinator_test.cpp"
         "${PROJECT_SOURCE_DIR}/client/tests/bootstrap_test.cpp"
         "${PROJECT_SOURCE_DIR}/client/tests/character_selector_test.cpp"
+        "${PROJECT_SOURCE_DIR}/client/tests/appearance_catalog_test.cpp"
+        "${PROJECT_SOURCE_DIR}/client/tests/lzma_stream_decoder_test.cpp"
         "${PROJECT_SOURCE_DIR}/client/tests/fixture_inspector_test.cpp"
         "${PROJECT_SOURCE_DIR}/client/tests/initial_world_response_codec_test.cpp"
         "${PROJECT_SOURCE_DIR}/client/tests/logger_test.cpp"
@@ -27,6 +57,9 @@ function(project_add_tests)
         PRIVATE
             core
             diagnostic_support
+            appearance_catalog
+            asset_compression
+            LibLZMA::LibLZMA
             logging
             protocol
             session

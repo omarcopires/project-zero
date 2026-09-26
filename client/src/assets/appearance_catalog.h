@@ -7,6 +7,7 @@
 #include <optional>
 #include <span>
 #include <unordered_map>
+#include <vector>
 
 namespace assets {
 
@@ -18,7 +19,12 @@ namespace assets {
 		std::size_t size(AppearanceKind kind) const noexcept;
 
 	private:
-		bool add(AppearanceKind kind, std::uint32_t id, const AppearanceFlags &flags);
+		bool add(
+			AppearanceKind kind,
+			std::uint32_t id,
+			const AppearanceFlags &flags,
+			std::vector<AppearanceFrameGroup> frameGroups
+		);
 
 		std::unordered_map<std::uint32_t, AppearanceDefinition> m_objects;
 		std::unordered_map<std::uint32_t, AppearanceDefinition> m_outfits;

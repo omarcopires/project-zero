@@ -9,6 +9,37 @@ function(project_add_targets)
             "${PROJECT_SOURCE_DIR}/client/src"
     )
 
+    add_library(
+        qml_enum_values
+        STATIC
+            "${PROJECT_SOURCE_DIR}/client/src/presentation/qml/qml_enum_values.cpp"
+            "${PROJECT_SOURCE_DIR}/client/src/presentation/qml/qml_enum_values.h"
+            "${PROJECT_SOURCE_DIR}/client/src/presentation/qml/map_antialiasing_mode.h"
+            "${PROJECT_SOURCE_DIR}/client/src/presentation/qml/split_resize_preference.h"
+    )
+    target_include_directories(
+        qml_enum_values
+        PUBLIC
+            "${PROJECT_SOURCE_DIR}/client/src"
+    )
+    target_link_libraries(qml_enum_values PUBLIC Qt6::Qml)
+    project_apply_cpp_options(qml_enum_values)
+    set_target_properties(qml_enum_values PROPERTIES AUTOMOC ON)
+
+    add_library(
+        client_translations
+        STATIC
+            "${PROJECT_SOURCE_DIR}/client/src/presentation/translations/json_catalog_translator.cpp"
+            "${PROJECT_SOURCE_DIR}/client/src/presentation/translations/json_catalog_translator.h"
+    )
+    target_include_directories(
+        client_translations
+        PUBLIC
+            "${PROJECT_SOURCE_DIR}/client/src"
+    )
+    target_link_libraries(client_translations PUBLIC Qt6::Core)
+    project_apply_cpp_options(client_translations)
+
     add_library(appearance_proto STATIC)
     target_sources(
         appearance_proto
@@ -43,6 +74,19 @@ function(project_add_targets)
     )
     target_link_libraries(appearance_catalog PUBLIC appearance_proto Qt6::Core PRIVATE core)
     project_apply_cpp_options(appearance_catalog)
+
+    add_library(
+        asset_compression
+        STATIC
+            "${PROJECT_SOURCE_DIR}/client/src/assets/lzma_stream_decoder.cpp"
+    )
+    target_include_directories(
+        asset_compression
+        PUBLIC
+            "${PROJECT_SOURCE_DIR}/client/src"
+    )
+    target_link_libraries(asset_compression PRIVATE LibLZMA::LibLZMA)
+    project_apply_cpp_options(asset_compression)
 
     add_library(
         protocol
