@@ -41,7 +41,10 @@ namespace protocol::game {
 			EXPECT_EQ(result.description.center.x, 200);
 			EXPECT_EQ(result.description.center.y, 200);
 			EXPECT_EQ(result.description.center.floor, 7);
-			EXPECT_TRUE(result.description.occupiedTiles.empty());
+			ASSERT_EQ(result.description.tiles.size(), surfaceTileCount);
+			for (const auto& tile : result.description.tiles) {
+				EXPECT_TRUE(tile.things.empty());
+			}
 			EXPECT_EQ(result.description.bytesConsumed, payload.size());
 		}
 
@@ -91,10 +94,10 @@ namespace protocol::game {
 				});
 
 			ASSERT_EQ(result.status, MapDescriptionDecodeStatus::Ready);
-			ASSERT_EQ(result.description.occupiedTiles.size(), 1);
-			ASSERT_EQ(result.description.occupiedTiles.front().things.size(), 1);
-			EXPECT_EQ(result.description.occupiedTiles.front().things.front().id, 100);
-			EXPECT_EQ(result.description.occupiedTiles.front().things.front().count, 2);
+			ASSERT_EQ(result.description.tiles.size(), surfaceTileCount);
+			ASSERT_EQ(result.description.tiles.front().things.size(), 1);
+			EXPECT_EQ(result.description.tiles.front().things.front().id, 100);
+			EXPECT_EQ(result.description.tiles.front().things.front().count, 2);
 		}
 
 	}

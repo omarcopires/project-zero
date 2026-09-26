@@ -166,7 +166,7 @@ void WorldSessionServiceTest::completesHandshakeAndPublishesFirstPayload() {
 	QCOMPARE(mapPositionSpy.first().at(0).toUInt(), 200U);
 	const auto decodedMap = qvariant_cast<protocol::game::MapDescription>(mapDescriptionSpy.first().first());
 	QCOMPARE(decodedMap.center.floor, 7);
-	QVERIFY(decodedMap.occupiedTiles.empty());
+	QCOMPARE(decodedMap.tiles.size(), static_cast<std::size_t>(18 * 14 * 8));
 	QCOMPARE(decodedMap.bytesConsumed, mapDescription.size());
 	QCOMPARE(failureSpy.count(), 0);
 }

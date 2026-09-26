@@ -449,6 +449,7 @@ namespace protocol::game {
 		Cursor cursor(payload, header->bytesConsumed);
 		TileDecodeState state;
 		const auto floors = floorsFor(header->center.floor);
+		description.tiles.reserve(static_cast<std::size_t>(tileWidth) * tileHeight * floors.size());
 		const auto minimumX = static_cast<std::int32_t>(header->center.x) - horizontalRadius;
 		const auto minimumY = static_cast<std::int32_t>(header->center.y) - verticalRadius;
 		const auto maximumX = minimumX + static_cast<std::int32_t>(tileWidth) - 1
@@ -463,26 +464,25 @@ namespace protocol::game {
 			const auto floorOffset = static_cast<std::int32_t>(header->center.floor) - floor;
 			for (std::uint16_t x = 0; x < tileWidth; ++x) {
 				for (std::uint16_t y = 0; y < tileHeight; ++y) {
-					if (state.pendingEmptyTiles > 0) {
-						--state.pendingEmptyTiles;
-						continue;
-					}
-
-					MapTile tile;
 					const WorldPosition position {
 						.x = static_cast<std::uint16_t>(static_cast<std::int32_t>(header->center.x) - horizontalRadius + x + floorOffset),
 						.y = static_cast<std::uint16_t>(static_cast<std::int32_t>(header->center.y) - verticalRadius + y + floorOffset),
 						.floor = floor,
 					};
+					if (state.pendingEmptyTiles > 0) {
+						--state.pendingEmptyTiles;
+						description.tiles.push_back({ .position = position });
+						continue;
+					}
+
+					MapTile tile;
 					if (!decodeTile(cursor, position, appearanceLookup, tile, state)) {
 						return { .status = state.status, .description = std::move(description) };
 					}
 					if (state.invalidRunLength) {
 						return { .status = MapDescriptionDecodeStatus::InvalidRunLength, .description = std::move(description) };
 					}
-					if (!tile.things.empty()) {
-						description.occupiedTiles.push_back(std::move(tile));
-					}
+					description.tiles.push_back(std::move(tile));
 				}
 			}
 		}

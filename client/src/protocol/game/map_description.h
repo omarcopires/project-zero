@@ -10,7 +10,7 @@ namespace protocol::game {
 
 	struct MapDescription {
 		WorldPosition center;
-		std::vector<MapTile> occupiedTiles;
+		std::vector<MapTile> tiles;
 		std::size_t bytesConsumed = 0;
 	};
 
