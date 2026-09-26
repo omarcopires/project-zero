@@ -14,4 +14,10 @@ namespace assets {
 		std::uint64_t maximumMemoryBytes
 	);
 
+	LzmaDecodeResult decodeCipSpriteSheet(
+		std::span<const std::byte> compressedBytes,
+		std::size_t maximumOutputBytes,
+		std::uint64_t maximumMemoryBytes
+	);
+
 }

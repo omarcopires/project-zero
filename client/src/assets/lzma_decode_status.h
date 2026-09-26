@@ -6,6 +6,7 @@ namespace assets {
 		Decoded,
 		EmptyInput,
 		InvalidConfiguration,
+		InvalidContainerHeader,
 		MemoryLimitExceeded,
 		ResourceFailure,
 		OutputLimitExceeded,
