@@ -113,6 +113,7 @@ function(project_add_frontend_resources)
         BASE "${PROJECT_SOURCE_DIR}/client/qml"
         FILES
             "${PROJECT_SOURCE_DIR}/client/qml/AppearanceInstanceRenderer.qml"
+            "${PROJECT_SOURCE_DIR}/client/qml/Lenshelp.qml"
             "${PROJECT_SOURCE_DIR}/client/qml/ObjectAppearanceInstance.qml"
             "${PROJECT_SOURCE_DIR}/client/qml/OutfitAppearanceInstance.qml"
             "${PROJECT_SOURCE_DIR}/client/qml/SingleObjectAppearanceInstanceRenderer.qml"

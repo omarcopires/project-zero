@@ -9,6 +9,13 @@ namespace client::presentation::rendering {
 
 	void registerAppearanceQmlTypes() {
 		qmlRegisterType(
+			QUrl(QStringLiteral("qrc:/qt/qml/clientui/Lenshelp.qml")),
+			"qmlcomponents",
+			1,
+			0,
+			"Lenshelp"
+		);
+		qmlRegisterType(
 			QUrl(QStringLiteral("qrc:/qt/qml/clientui/AppearanceInstanceRenderer.qml")),
 			"qmlcomponents",
 			1,

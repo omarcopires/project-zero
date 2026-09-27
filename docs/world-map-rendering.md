@@ -1,32 +1,11 @@
 # Renderização inicial do mapa
 
-O módulo `qmlcomponents` agora registra tipos C++ para `WorldMap` e `LightMap`,
-sem alterar o `qmldir` ou os QMLs originais. `WorldMapItem` aceita uma
-`MapDescription` decodificada e uma função de resolução de aparências. Ele
-desenha os objetos do andar central em campos de 32 pixels, centrados na
-posição inicial; imagens maiores que um campo são ancoradas pela base.
+O módulo `qmlcomponents` registra tipos C++ para `WorldMap` e `LightMap`, sem alterar o `qmldir` ou os QMLs originais. `WorldMapItem` aceita uma `MapDescription` decodificada e uma função de resolução de aparências. Ele desenha objetos do andar central em campos de 32 pixels, centrados na posição inicial; imagens maiores que um campo são ancoradas pela base.
 
-O recorte suporta desenho estático via callback. Ele ainda não compõe
-multicamadas, padrões direcionais, animações, outfit colors, andares vizinhos,
-iluminação ou comandos do mapa. `LightMapItem` preserva a propriedade `scale`
-esperada pelo QML, mas permanece transparente enquanto não há dados de luz.
+O recorte suporta desenho estático via callback. Ainda não compõe multicamadas, padrões direcionais, animações, cores de outfit, andares vizinhos, iluminação ou comandos do mapa. `LightMapItem` preserva a propriedade `scale` esperada pelo QML, mas permanece transparente enquanto não há dados de luz.
 
-O host carrega `clientwindow.qml` e agora tenta criar `gamewindow.qml` no
-`placeholder` original. A composição só é anexada quando o componente está
-pronto e sua criação não registra erros QML; caso contrário, o splash permanece
-visível e os erros são gravados em `debug.log`. Isso evita esconder uma
-dependência ausente como se a interface estivesse carregada.
+O host carrega `clientwindow.qml` e tenta criar `gamewindow.qml` no `placeholder` original. A composição só é anexada quando o componente está pronto e sua criação não registra erros QML; caso contrário, o splash permanece visível e os erros são gravados em `debug.log`.
 
-A composição ainda depende de tipos que não existem no código C++ nem no módulo
-QML deste repositório: `AppearanceInstanceRenderer`,
-`ObjectAppearanceInstance`, `OutfitAppearanceInstance` e
-`TibiaTargetSelection`. `SingleObjectAppearanceInstanceRenderer` agora tem uma
-implementação do cliente que mostra aparências de objeto somente quando o
-provider consegue resolver um único sprite estático. Contagem, líquidos,
-direção de gancho, decoração e animação ainda não são desenhados por esse
-adaptador. Portanto, a integração da tela completa continua condicionada aos
-tipos restantes. `RenderDriver` está registrado como um item sem conteúdo visual
-que expõe o backend Qt Quick selecionado; ele não escolhe backend nem implementa
-o renderer privado original. Ainda falta conectar a sessão do mundo ao mapa e
-injetar um resolver de aparências; o controller do mapa permanece pendente. Os
-QMLs originais continuam inalterados.
+O cliente contém adaptadores QML próprios para `AppearanceInstanceRenderer`, `ObjectAppearanceInstance` e `OutfitAppearanceInstance`. O renderer mostra objetos estáticos quando o provider consegue resolver um único sprite; não implementa catálogo de raças, composição em camadas, animação, cores de outfit ou efeitos. `SingleObjectAppearanceInstanceRenderer` também cobre somente um sprite estático, sem contagem, líquidos, direção de gancho ou decoração.
+
+`Lenshelp` mantém as propriedades esperadas pelo QML, mas não mostra o painel de ajuda, pois seu controller nativo não está disponível. `RenderDriver` expõe o backend Qt Quick selecionado, mas não escolhe backend nem implementa o renderer privado original. `TibiaTargetSelection` e a integração da sessão do mundo ao mapa ainda estão pendentes, assim como injetar um resolver de aparências no mapa. Os QMLs originais continuam inalterados.
