@@ -11,6 +11,7 @@
 #include "infrastructure/logging/logger.h"
 #include "presentation/qml/qml_enum_values.h"
 #include "presentation/rendering/appearance_image_provider.h"
+#include "presentation/rendering/world_map_qml_types.h"
 #include "presentation/translations/json_catalog_translator.h"
 
 int main(int argc, char* argv[]) {
@@ -26,6 +27,7 @@ int main(int argc, char* argv[]) {
 	logger.info("main", "Starting visual client");
 
 	client::presentation::qml::registerQmlEnumValues();
+	client::presentation::rendering::registerWorldMapQmlTypes();
 	client::presentation::translations::JsonCatalogTranslator translations;
 	if (!translations.loadCatalog(QStringLiteral(":/translations/en.json"))) {
 		logger.error("main", "Failed to load the English translation catalog");

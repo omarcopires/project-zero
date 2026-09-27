@@ -1,10 +1,14 @@
-#include <QGuiApplication>
+#include <QColor>
 #include <QFile>
+#include <QGuiApplication>
+#include <QImage>
 #include <QImageReader>
+#include <QPainter>
 #include <QQmlApplicationEngine>
-#include <QQuickWindow>
 #include <QQmlComponent>
 #include <QQmlEngine>
+#include <QQuickWindow>
+#include <QScopedPointer>
 #include <QString>
 #include <QUrl>
 #include <QtTest>
@@ -12,7 +16,16 @@
 #include "presentation/qml/qml_enum_values.h"
 #include "presentation/qml/map_antialiasing_mode.h"
 #include "presentation/qml/split_resize_preference.h"
+#include "presentation/rendering/light_map_item.h"
+#include "presentation/rendering/world_map_item.h"
+#include "presentation/rendering/world_map_qml_types.h"
 #include "presentation/translations/json_catalog_translator.h"
+#include "protocol/game/map_description.h"
+#include "protocol/game/map_thing.h"
+#include "protocol/game/map_tile.h"
+
+#include <cstdint>
+#include <utility>
 
 class QmlBootstrapTest final : public QObject {
 	Q_OBJECT
@@ -22,6 +35,8 @@ private slots:
 	void loadsEnglishBootstrapTranslations();
 	void loadsOriginalClientWindow();
 	void exposesSplitResizePreferencesToQml();
+	void registersMapItemsForTheOriginalModule();
+	void paintsStaticMapObjectsAtTheirWorldPosition();
 
 private:
 	client::presentation::translations::JsonCatalogTranslator m_translations;
@@ -29,8 +44,61 @@ private:
 
 void QmlBootstrapTest::initTestCase() {
 	client::presentation::qml::registerQmlEnumValues();
+	client::presentation::rendering::registerWorldMapQmlTypes();
 	QVERIFY(m_translations.loadCatalog(QStringLiteral(":/translations/en.json")));
 	QCoreApplication::installTranslator(&m_translations);
+}
+
+void QmlBootstrapTest::registersMapItemsForTheOriginalModule() {
+	QQmlEngine engine;
+	engine.addImportPath(QStringLiteral("qrc:/qt/qml"));
+	QQmlComponent component(&engine);
+	component.setData(
+		"import QtQuick\n"
+		"import qmlcomponents\n"
+		"Item {\n"
+		"    WorldMap { objectName: 'worldMap' }\n"
+		"    LightMap { objectName: 'lightMap'; scale: 32 }\n"
+		"}\n",
+		QUrl()
+	);
+	QScopedPointer<QObject> root(component.create());
+	QVERIFY2(root, qPrintable(component.errorString()));
+	QVERIFY(root->findChild<client::presentation::rendering::WorldMapItem*>(QStringLiteral("worldMap")));
+	const auto *lightMap = root->findChild<client::presentation::rendering::LightMapItem*>(QStringLiteral("lightMap"));
+	QVERIFY(lightMap != nullptr);
+	QCOMPARE(lightMap->lightScale(), 32.0);
+}
+
+void QmlBootstrapTest::paintsStaticMapObjectsAtTheirWorldPosition() {
+	client::presentation::rendering::WorldMapItem worldMap;
+	worldMap.setWidth(96);
+	worldMap.setHeight(96);
+	worldMap.setAppearanceImageLookup([](const assets::AppearanceKind kind, const std::uint32_t id) {
+		if (kind != assets::AppearanceKind::Object || id != 4200) {
+			return QImage {};
+		}
+		QImage image(32, 32, QImage::Format_ARGB32_Premultiplied);
+		image.fill(Qt::red);
+		return image;
+	});
+
+	protocol::game::MapDescription description;
+	description.center = { .x = 100, .y = 200, .floor = 7 };
+	protocol::game::MapTile tile;
+	tile.position = description.center;
+	tile.things.push_back({ .kind = protocol::game::MapThingKind::Object, .id = 4200 });
+	description.tiles.push_back(tile);
+	worldMap.setMapDescription(std::move(description));
+
+	QImage canvas(96, 96, QImage::Format_ARGB32_Premultiplied);
+	canvas.fill(Qt::transparent);
+	QPainter painter(&canvas);
+	worldMap.paint(&painter);
+	painter.end();
+
+	QCOMPARE(canvas.pixelColor(48, 48), QColor(Qt::red));
+	QCOMPARE(canvas.pixelColor(16, 16), QColor(Qt::transparent));
 }
 
 void QmlBootstrapTest::loadsEnglishBootstrapTranslations() {

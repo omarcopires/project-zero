@@ -127,6 +127,29 @@ function(project_add_targets)
     project_apply_cpp_options(appearance_image_provider)
 
     add_library(
+        world_map_presentation
+        STATIC
+            "${PROJECT_SOURCE_DIR}/client/src/presentation/rendering/light_map_item.cpp"
+            "${PROJECT_SOURCE_DIR}/client/src/presentation/rendering/light_map_item.h"
+            "${PROJECT_SOURCE_DIR}/client/src/presentation/rendering/world_map_item.cpp"
+            "${PROJECT_SOURCE_DIR}/client/src/presentation/rendering/world_map_item.h"
+            "${PROJECT_SOURCE_DIR}/client/src/presentation/rendering/world_map_qml_types.cpp"
+            "${PROJECT_SOURCE_DIR}/client/src/presentation/rendering/world_map_qml_types.h"
+    )
+    target_include_directories(
+        world_map_presentation
+        PUBLIC
+            "${PROJECT_SOURCE_DIR}/client/src"
+    )
+    target_link_libraries(
+        world_map_presentation
+        PUBLIC
+            Qt6::Quick
+    )
+    project_apply_cpp_options(world_map_presentation)
+    set_target_properties(world_map_presentation PROPERTIES AUTOMOC ON)
+
+    add_library(
         protocol
         STATIC
             "${PROJECT_SOURCE_DIR}/client/src/protocol/binary/adler32.cpp"

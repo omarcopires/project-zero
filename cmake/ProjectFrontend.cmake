@@ -143,6 +143,7 @@ function(project_add_frontend)
         PRIVATE
             logging
             appearance_image_provider
+            world_map_presentation
             qml_enum_values
             client_translations
             Qt6::Gui

@@ -9,6 +9,7 @@ function(project_add_tests)
     target_link_libraries(
         qml_integration_tests
         PRIVATE
+            world_map_presentation
             qml_enum_values
             client_translations
             Qt6::Gui
