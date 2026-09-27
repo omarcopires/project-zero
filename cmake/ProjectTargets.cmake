@@ -107,6 +107,26 @@ function(project_add_targets)
     project_apply_cpp_options(sprite_sheet_assets)
 
     add_library(
+        appearance_image_provider
+        STATIC
+            "${PROJECT_SOURCE_DIR}/client/src/presentation/rendering/appearance_image_provider.cpp"
+            "${PROJECT_SOURCE_DIR}/client/src/presentation/rendering/appearance_image_provider.h"
+    )
+    target_include_directories(
+        appearance_image_provider
+        PUBLIC
+            "${PROJECT_SOURCE_DIR}/client/src"
+    )
+    target_link_libraries(
+        appearance_image_provider
+        PUBLIC
+            appearance_catalog
+            sprite_sheet_assets
+            Qt6::Quick
+    )
+    project_apply_cpp_options(appearance_image_provider)
+
+    add_library(
         protocol
         STATIC
             "${PROJECT_SOURCE_DIR}/client/src/protocol/binary/adler32.cpp"

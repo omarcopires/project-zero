@@ -2,6 +2,10 @@ cmake_minimum_required(VERSION 3.30)
 
 project(client_engine LANGUAGES CXX)
 
+if(WIN32)
+    enable_language(RC)
+endif()
+
 include(CTest)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")

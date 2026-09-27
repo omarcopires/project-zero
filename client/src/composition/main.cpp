@@ -1,4 +1,5 @@
 #include <QGuiApplication>
+#include <QIcon>
 #include <QQmlError>
 #include <QQmlApplicationEngine>
 #include <QString>
@@ -9,11 +10,13 @@
 
 #include "infrastructure/logging/logger.h"
 #include "presentation/qml/qml_enum_values.h"
+#include "presentation/rendering/appearance_image_provider.h"
 #include "presentation/translations/json_catalog_translator.h"
 
 int main(int argc, char* argv[]) {
 	QGuiApplication application(argc, argv);
 	application.setApplicationName(QStringLiteral("Client"));
+	application.setWindowIcon(QIcon(QStringLiteral(":/icons/client.ico")));
 	QCoreApplication::addLibraryPath(QCoreApplication::applicationDirPath() + QStringLiteral("/plugins"));
 	const auto debugLogPath = std::filesystem::path(QGuiApplication::applicationDirPath().toStdWString()) / "debug.log";
 	infrastructure::logging::Logger logger({
@@ -31,6 +34,11 @@ int main(int argc, char* argv[]) {
 	application.installTranslator(&translations);
 
 	QQmlApplicationEngine engine;
+	const QString assetsDirectory = QString::fromLocal8Bit(qgetenv("CLIENT_ASSETS_DIRECTORY"));
+	engine.addImageProvider(
+		QStringLiteral("appearance"),
+		new client::presentation::rendering::AppearanceImageProvider(assetsDirectory)
+	);
 	QObject::connect(
 		&engine,
 		&QQmlApplicationEngine::warnings,

@@ -107,6 +107,12 @@ function(project_add_frontend_resources)
         BASE "${PROJECT_SOURCE_DIR}/client/translations"
         FILES "${PROJECT_SOURCE_DIR}/client/translations/en.json"
     )
+    qt6_add_resources(
+        frontend_resources client_icon
+        PREFIX "/icons"
+        BASE "${PROJECT_SOURCE_DIR}/client/icon"
+        FILES "${PROJECT_SOURCE_DIR}/client/icon/client.ico"
+    )
     target_link_libraries(frontend_resources PRIVATE Qt6::Core)
 endfunction()
 
@@ -120,6 +126,15 @@ function(project_add_frontend)
         "${PROJECT_SOURCE_DIR}/client/src/composition/main.cpp"
     )
 
+    if(WIN32)
+        target_sources(
+            client_app
+            PRIVATE
+                "${PROJECT_SOURCE_DIR}/client/icon/client.rc"
+                "${PROJECT_SOURCE_DIR}/client/icon/client.ico"
+        )
+    endif()
+
     project_add_frontend_resources()
     project_attach_frontend_resources(client_app)
 
@@ -127,6 +142,7 @@ function(project_add_frontend)
         client_app
         PRIVATE
             logging
+            appearance_image_provider
             qml_enum_values
             client_translations
             Qt6::Gui

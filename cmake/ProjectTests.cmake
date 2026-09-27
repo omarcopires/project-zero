@@ -35,6 +35,7 @@ function(project_add_tests)
         "${PROJECT_SOURCE_DIR}/client/tests/bootstrap_test.cpp"
         "${PROJECT_SOURCE_DIR}/client/tests/character_selector_test.cpp"
         "${PROJECT_SOURCE_DIR}/client/tests/appearance_catalog_test.cpp"
+        "${PROJECT_SOURCE_DIR}/client/tests/appearance_image_provider_test.cpp"
         "${PROJECT_SOURCE_DIR}/client/tests/lzma_stream_decoder_test.cpp"
         "${PROJECT_SOURCE_DIR}/client/tests/sprite_sheet_loader_test.cpp"
         "${PROJECT_SOURCE_DIR}/client/tests/fixture_inspector_test.cpp"
@@ -59,6 +60,7 @@ function(project_add_tests)
             core
             diagnostic_support
             appearance_catalog
+            appearance_image_provider
             asset_compression
             sprite_sheet_assets
             LibLZMA::LibLZMA
