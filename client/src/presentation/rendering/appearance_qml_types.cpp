@@ -9,11 +9,46 @@ namespace client::presentation::rendering {
 
 	void registerAppearanceQmlTypes() {
 		qmlRegisterType(
+			QUrl(QStringLiteral("qrc:/qt/qml/clientui/CachedOutlineText.qml")),
+			"qmlcomponents",
+			1,
+			0,
+			"CachedOutlineText"
+		);
+		qmlRegisterType(
+			QUrl(QStringLiteral("qrc:/qt/qml/clientui/TibiaTutorialMarker.qml")),
+			"qmlcomponents",
+			1,
+			0,
+			"TibiaTutorialMarker"
+		);
+		qmlRegisterType(
 			QUrl(QStringLiteral("qrc:/qt/qml/clientui/Lenshelp.qml")),
 			"qmlcomponents",
 			1,
 			0,
 			"Lenshelp"
+		);
+		qmlRegisterType(
+			QUrl(QStringLiteral("qrc:/qt/qml/clientui/NumericalEffectOverlay.qml")),
+			"qmlcomponents",
+			1,
+			0,
+			"NumericalEffectOverlay"
+		);
+		qmlRegisterType(
+			QUrl(QStringLiteral("qrc:/qt/qml/clientui/SpeechBubbleOverlay.qml")),
+			"qmlcomponents",
+			1,
+			0,
+			"SpeechBubbleOverlay"
+		);
+		qmlRegisterType(
+			QUrl(QStringLiteral("qrc:/qt/qml/clientui/TibiaTargetSelection.qml")),
+			"qmlcomponents",
+			1,
+			0,
+			"TibiaTargetSelection"
 		);
 		qmlRegisterType(
 			QUrl(QStringLiteral("qrc:/qt/qml/clientui/AppearanceInstanceRenderer.qml")),

@@ -16,13 +16,17 @@ function(project_add_targets)
             "${PROJECT_SOURCE_DIR}/client/src/presentation/qml/qml_enum_values.h"
             "${PROJECT_SOURCE_DIR}/client/src/presentation/qml/map_antialiasing_mode.h"
             "${PROJECT_SOURCE_DIR}/client/src/presentation/qml/split_resize_preference.h"
+            "${PROJECT_SOURCE_DIR}/client/src/presentation/qml/tooltip_helper.cpp"
+            "${PROJECT_SOURCE_DIR}/client/src/presentation/qml/tooltip_helper.h"
+            "${PROJECT_SOURCE_DIR}/client/src/presentation/qml/sound_helper.cpp"
+            "${PROJECT_SOURCE_DIR}/client/src/presentation/qml/sound_helper.h"
     )
     target_include_directories(
         qml_enum_values
         PUBLIC
             "${PROJECT_SOURCE_DIR}/client/src"
     )
-    target_link_libraries(qml_enum_values PUBLIC Qt6::Qml)
+    target_link_libraries(qml_enum_values PUBLIC Qt6::Qml Qt6::Quick)
     project_apply_cpp_options(qml_enum_values)
     set_target_properties(qml_enum_values PROPERTIES AUTOMOC ON)
 
@@ -111,6 +115,8 @@ function(project_add_targets)
         STATIC
             "${PROJECT_SOURCE_DIR}/client/src/presentation/rendering/appearance_image_provider.cpp"
             "${PROJECT_SOURCE_DIR}/client/src/presentation/rendering/appearance_image_provider.h"
+            "${PROJECT_SOURCE_DIR}/client/src/presentation/rendering/optimized_border_image_provider.cpp"
+            "${PROJECT_SOURCE_DIR}/client/src/presentation/rendering/optimized_border_image_provider.h"
     )
     target_include_directories(
         appearance_image_provider

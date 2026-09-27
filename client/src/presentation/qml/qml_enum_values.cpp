@@ -41,6 +41,15 @@ namespace client::presentation::qml {
 				return new TibiaEnumsAdapter;
 			}
 		);
+		qmlRegisterSingletonType<TibiaEnumsAdapter>(
+			"qmlcomponents",
+			1,
+			0,
+			"TibiaEnums",
+			[](QQmlEngine*, QJSEngine*) -> QObject* {
+				return new TibiaEnumsAdapter;
+			}
+		);
 	}
 
 }

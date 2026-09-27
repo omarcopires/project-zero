@@ -2,6 +2,7 @@
 #include <QIcon>
 #include <QQmlApplicationEngine>
 #include <QQmlComponent>
+#include <QQmlContext>
 #include <QQmlError>
 #include <QQuickItem>
 #include <QQuickWindow>
@@ -13,8 +14,11 @@
 
 #include "infrastructure/logging/logger.h"
 #include "presentation/qml/qml_enum_values.h"
+#include "presentation/qml/sound_helper.h"
+#include "presentation/qml/tooltip_helper.h"
 #include "presentation/rendering/appearance_image_provider.h"
 #include "presentation/rendering/appearance_qml_types.h"
+#include "presentation/rendering/optimized_border_image_provider.h"
 #include "presentation/rendering/world_map_qml_types.h"
 #include "presentation/translations/json_catalog_translator.h"
 
@@ -31,6 +35,7 @@ int main(int argc, char* argv[]) {
 	logger.info("main", "Starting visual client");
 
 	client::presentation::qml::registerQmlEnumValues();
+	client::presentation::qml::registerSoundHelper();
 	client::presentation::rendering::registerAppearanceQmlTypes();
 	client::presentation::rendering::registerWorldMapQmlTypes();
 	client::presentation::translations::JsonCatalogTranslator translations;
@@ -41,10 +46,21 @@ int main(int argc, char* argv[]) {
 	application.installTranslator(&translations);
 
 	QQmlApplicationEngine engine;
+	auto *tooltipHelper = new client::presentation::qml::TooltipHelper(&engine);
+	engine.rootContext()->setContextProperty(QStringLiteral("TooltipHelper"), tooltipHelper);
+	engine.rootContext()->setContextProperty(QStringLiteral("UICachingEnabled"), false);
+	engine.rootContext()->setContextProperty(
+		QStringLiteral("tibiaMouseCursorController"),
+		static_cast<QObject *>(nullptr)
+	);
 	const QString assetsDirectory = QString::fromLocal8Bit(qgetenv("CLIENT_ASSETS_DIRECTORY"));
 	engine.addImageProvider(
 		QStringLiteral("appearance"),
 		new client::presentation::rendering::AppearanceImageProvider(assetsDirectory)
+	);
+	engine.addImageProvider(
+		QStringLiteral("optimized1pixelborderimage"),
+		new client::presentation::rendering::OptimizedBorderImageProvider
 	);
 	QObject::connect(
 		&engine,

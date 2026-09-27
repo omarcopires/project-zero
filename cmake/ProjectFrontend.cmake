@@ -66,6 +66,44 @@ function(project_add_frontend_resources)
         "${PROJECT_SOURCE_DIR}/things/images/*"
     )
 
+    # The original QML uses categorized image paths, while the checked-in
+    # images are flat. Add aliases for literal QML URLs that have source files.
+    set(frontend_image_aliases)
+    set(frontend_image_alias_qrc_content "<RCC version=\"1.0\"><qresource prefix=\"/images\">\n")
+    set(frontend_qml_image_sources ${client_frontend_qml_files} ${client_legacy_qml_files})
+    foreach(qml_file IN LISTS frontend_qml_image_sources)
+        if(NOT qml_file MATCHES "\\.qml$")
+            continue()
+        endif()
+        file(READ "${qml_file}" qml_source)
+        string(REGEX MATCHALL "/images/[A-Za-z0-9_./-]+" image_urls "${qml_source}")
+        foreach(image_url IN LISTS image_urls)
+            string(REGEX REPLACE "^/images/" "" image_alias "${image_url}")
+            if(NOT image_alias MATCHES "/" OR image_alias MATCHES "^skin/classic/")
+                continue()
+            endif()
+            get_filename_component(image_name "${image_alias}" NAME)
+            set(image_source "${PROJECT_SOURCE_DIR}/things/images/${image_name}")
+            if(NOT EXISTS "${image_source}")
+                continue()
+            endif()
+            list(FIND frontend_image_aliases "${image_alias}" image_alias_index)
+            if(NOT image_alias_index EQUAL -1)
+                continue()
+            endif()
+            list(APPEND frontend_image_aliases "${image_alias}")
+            file(TO_CMAKE_PATH "${image_source}" image_source)
+            string(REPLACE "&" "&amp;" image_source_xml "${image_source}")
+            string(APPEND frontend_image_alias_qrc_content
+                "    <file alias=\"${image_alias}\">${image_source_xml}</file>\n")
+        endforeach()
+    endforeach()
+    string(APPEND frontend_image_alias_qrc_content "</qresource></RCC>\n")
+    set(frontend_image_alias_qrc "${PROJECT_BINARY_DIR}/frontend_image_aliases.qrc")
+    file(WRITE "${frontend_image_alias_qrc}" "${frontend_image_alias_qrc_content}")
+    set_property(TARGET frontend_resources PROPERTY AUTORCC ON)
+    target_sources(frontend_resources PRIVATE "${frontend_image_alias_qrc}")
+
     project_sanitize_qmldir_resources(
         client_frontend_qml_files
         "${PROJECT_SOURCE_DIR}/things/qt/qml/qmlcomponents"
@@ -113,10 +151,15 @@ function(project_add_frontend_resources)
         BASE "${PROJECT_SOURCE_DIR}/client/qml"
         FILES
             "${PROJECT_SOURCE_DIR}/client/qml/AppearanceInstanceRenderer.qml"
+            "${PROJECT_SOURCE_DIR}/client/qml/CachedOutlineText.qml"
             "${PROJECT_SOURCE_DIR}/client/qml/Lenshelp.qml"
+            "${PROJECT_SOURCE_DIR}/client/qml/NumericalEffectOverlay.qml"
             "${PROJECT_SOURCE_DIR}/client/qml/ObjectAppearanceInstance.qml"
             "${PROJECT_SOURCE_DIR}/client/qml/OutfitAppearanceInstance.qml"
+            "${PROJECT_SOURCE_DIR}/client/qml/SpeechBubbleOverlay.qml"
             "${PROJECT_SOURCE_DIR}/client/qml/SingleObjectAppearanceInstanceRenderer.qml"
+            "${PROJECT_SOURCE_DIR}/client/qml/TibiaTargetSelection.qml"
+            "${PROJECT_SOURCE_DIR}/client/qml/TibiaTutorialMarker.qml"
     )
     qt6_add_resources(
         frontend_resources client_icon
