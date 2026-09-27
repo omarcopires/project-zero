@@ -133,6 +133,8 @@ function(project_add_targets)
             "${PROJECT_SOURCE_DIR}/client/src/presentation/rendering/appearance_qml_types.h"
             "${PROJECT_SOURCE_DIR}/client/src/presentation/rendering/light_map_item.cpp"
             "${PROJECT_SOURCE_DIR}/client/src/presentation/rendering/light_map_item.h"
+            "${PROJECT_SOURCE_DIR}/client/src/presentation/rendering/render_driver_item.cpp"
+            "${PROJECT_SOURCE_DIR}/client/src/presentation/rendering/render_driver_item.h"
             "${PROJECT_SOURCE_DIR}/client/src/presentation/rendering/world_map_item.cpp"
             "${PROJECT_SOURCE_DIR}/client/src/presentation/rendering/world_map_item.h"
             "${PROJECT_SOURCE_DIR}/client/src/presentation/rendering/world_map_qml_types.cpp"

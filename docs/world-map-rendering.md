@@ -18,13 +18,15 @@ visível e os erros são gravados em `debug.log`. Isso evita esconder uma
 dependência ausente como se a interface estivesse carregada.
 
 A composição ainda depende de tipos que não existem no código C++ nem no módulo
-QML deste repositório: `RenderDriver`, `AppearanceInstanceRenderer`,
+QML deste repositório: `AppearanceInstanceRenderer`,
 `ObjectAppearanceInstance`, `OutfitAppearanceInstance` e
 `TibiaTargetSelection`. `SingleObjectAppearanceInstanceRenderer` agora tem uma
 implementação do cliente que mostra aparências de objeto somente quando o
 provider consegue resolver um único sprite estático. Contagem, líquidos,
 direção de gancho, decoração e animação ainda não são desenhados por esse
 adaptador. Portanto, a integração da tela completa continua condicionada aos
-tipos restantes. Ainda falta conectar a sessão do mundo ao mapa e injetar um
-resolver de aparências; o controller do mapa permanece pendente. Os QMLs
-originais continuam inalterados.
+tipos restantes. `RenderDriver` está registrado como um item sem conteúdo visual
+que expõe o backend Qt Quick selecionado; ele não escolhe backend nem implementa
+o renderer privado original. Ainda falta conectar a sessão do mundo ao mapa e
+injetar um resolver de aparências; o controller do mapa permanece pendente. Os
+QMLs originais continuam inalterados.
