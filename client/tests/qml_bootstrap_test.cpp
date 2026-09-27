@@ -16,6 +16,7 @@
 #include "presentation/qml/qml_enum_values.h"
 #include "presentation/qml/map_antialiasing_mode.h"
 #include "presentation/qml/split_resize_preference.h"
+#include "presentation/rendering/appearance_qml_types.h"
 #include "presentation/rendering/light_map_item.h"
 #include "presentation/rendering/world_map_item.h"
 #include "presentation/rendering/world_map_qml_types.h"
@@ -36,6 +37,7 @@ private slots:
 	void loadsOriginalClientWindow();
 	void exposesSplitResizePreferencesToQml();
 	void registersMapItemsForTheOriginalModule();
+	void registersStaticObjectRendererForTheOriginalModule();
 	void paintsStaticMapObjectsAtTheirWorldPosition();
 
 private:
@@ -44,6 +46,7 @@ private:
 
 void QmlBootstrapTest::initTestCase() {
 	client::presentation::qml::registerQmlEnumValues();
+	client::presentation::rendering::registerAppearanceQmlTypes();
 	client::presentation::rendering::registerWorldMapQmlTypes();
 	QVERIFY(m_translations.loadCatalog(QStringLiteral(":/translations/en.json")));
 	QCoreApplication::installTranslator(&m_translations);
@@ -99,6 +102,34 @@ void QmlBootstrapTest::paintsStaticMapObjectsAtTheirWorldPosition() {
 
 	QCOMPARE(canvas.pixelColor(48, 48), QColor(Qt::red));
 	QCOMPARE(canvas.pixelColor(16, 16), QColor(Qt::transparent));
+}
+
+void QmlBootstrapTest::registersStaticObjectRendererForTheOriginalModule() {
+	QQmlEngine engine;
+	engine.addImportPath(QStringLiteral("qrc:/qt/qml"));
+	QQmlComponent component(&engine);
+	component.setData(
+		"import QtQuick\n"
+		"import qmlcomponents\n"
+		"Item {\n"
+		"    SingleObjectAppearanceInstanceRenderer {\n"
+		"        objectName: 'staticObjectRenderer'\n"
+		"        typeid: 0\n"
+		"        cumulativeCount: 3\n"
+		"        scaleFactor: 2.0\n"
+		"        smoothTextureFiltering: true\n"
+		"    }\n"
+		"}\n",
+		QUrl()
+	);
+	QScopedPointer<QObject> root(component.create());
+	QVERIFY2(root, qPrintable(component.errorString()));
+	QObject *renderer = root->findChild<QObject*>(QStringLiteral("staticObjectRenderer"));
+	QVERIFY(renderer != nullptr);
+	QCOMPARE(renderer->property("typeid").toInt(), 0);
+	QCOMPARE(renderer->property("cumulativeCount").toInt(), 3);
+	QCOMPARE(renderer->property("scaleFactor").toReal(), 2.0);
+	QCOMPARE(renderer->property("smoothTextureFiltering").toBool(), true);
 }
 
 void QmlBootstrapTest::loadsEnglishBootstrapTranslations() {

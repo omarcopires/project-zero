@@ -108,6 +108,12 @@ function(project_add_frontend_resources)
         FILES "${PROJECT_SOURCE_DIR}/client/translations/en.json"
     )
     qt6_add_resources(
+        frontend_resources client_qml
+        PREFIX "/qt/qml/clientui"
+        BASE "${PROJECT_SOURCE_DIR}/client/qml"
+        FILES "${PROJECT_SOURCE_DIR}/client/qml/SingleObjectAppearanceInstanceRenderer.qml"
+    )
+    qt6_add_resources(
         frontend_resources client_icon
         PREFIX "/icons"
         BASE "${PROJECT_SOURCE_DIR}/client/icon"

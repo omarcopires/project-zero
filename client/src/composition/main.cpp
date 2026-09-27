@@ -1,7 +1,10 @@
 #include <QGuiApplication>
 #include <QIcon>
-#include <QQmlError>
 #include <QQmlApplicationEngine>
+#include <QQmlComponent>
+#include <QQmlError>
+#include <QQuickItem>
+#include <QQuickWindow>
 #include <QString>
 #include <QUrl>
 
@@ -11,6 +14,7 @@
 #include "infrastructure/logging/logger.h"
 #include "presentation/qml/qml_enum_values.h"
 #include "presentation/rendering/appearance_image_provider.h"
+#include "presentation/rendering/appearance_qml_types.h"
 #include "presentation/rendering/world_map_qml_types.h"
 #include "presentation/translations/json_catalog_translator.h"
 
@@ -27,6 +31,7 @@ int main(int argc, char* argv[]) {
 	logger.info("main", "Starting visual client");
 
 	client::presentation::qml::registerQmlEnumValues();
+	client::presentation::rendering::registerAppearanceQmlTypes();
 	client::presentation::rendering::registerWorldMapQmlTypes();
 	client::presentation::translations::JsonCatalogTranslator translations;
 	if (!translations.loadCatalog(QStringLiteral(":/translations/en.json"))) {
@@ -56,6 +61,49 @@ int main(int argc, char* argv[]) {
 	if (engine.rootObjects().isEmpty()) {
 		logger.error("main", "Failed to load the client window");
 		return EXIT_FAILURE;
+	}
+
+	auto *clientWindow = qobject_cast<QQuickWindow*>(engine.rootObjects().front());
+	if (clientWindow == nullptr) {
+		logger.error("main", "The client window root is not a Qt Quick window");
+		return EXIT_FAILURE;
+	}
+	QQuickItem *placeholder = nullptr;
+	for (QQuickItem *child : clientWindow->contentItem()->childItems()) {
+		if (child->objectName() == QStringLiteral("placeholder")) {
+			placeholder = child;
+			break;
+		}
+	}
+	if (placeholder == nullptr) {
+		logger.error("main", "The client window does not expose its game window placeholder");
+		return EXIT_FAILURE;
+	}
+
+	QQmlComponent gameWindowComponent(
+		&engine,
+		QUrl(QStringLiteral("qrc:/qt/qml/qmlcomponents/qml/gamewindow.qml"))
+	);
+	if (!gameWindowComponent.isReady()) {
+		for (const auto &error : gameWindowComponent.errors()) {
+			logger.error("qml", "{}", error.toString().toStdString());
+		}
+		logger.error("main", "The original game window cannot be composed until its QML dependencies are available");
+	} else {
+		QObject *gameWindowObject = gameWindowComponent.create();
+		auto *gameWindow = qobject_cast<QQuickItem*>(gameWindowObject);
+		const auto creationErrors = gameWindowComponent.errors();
+		if (gameWindow == nullptr || !creationErrors.isEmpty()) {
+			for (const auto &error : gameWindowComponent.errors()) {
+				logger.error("qml", "{}", error.toString().toStdString());
+			}
+			logger.error("main", "The original game window failed to create without QML errors");
+			delete gameWindowObject;
+		} else {
+			gameWindow->setParent(placeholder);
+			gameWindow->setParentItem(placeholder);
+			logger.info("main", "The original game window was added to the client window");
+		}
 	}
 
 	return application.exec();

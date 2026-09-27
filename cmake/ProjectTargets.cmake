@@ -129,6 +129,8 @@ function(project_add_targets)
     add_library(
         world_map_presentation
         STATIC
+            "${PROJECT_SOURCE_DIR}/client/src/presentation/rendering/appearance_qml_types.cpp"
+            "${PROJECT_SOURCE_DIR}/client/src/presentation/rendering/appearance_qml_types.h"
             "${PROJECT_SOURCE_DIR}/client/src/presentation/rendering/light_map_item.cpp"
             "${PROJECT_SOURCE_DIR}/client/src/presentation/rendering/light_map_item.h"
             "${PROJECT_SOURCE_DIR}/client/src/presentation/rendering/world_map_item.cpp"
@@ -144,6 +146,7 @@ function(project_add_targets)
     target_link_libraries(
         world_map_presentation
         PUBLIC
+            Qt6::Qml
             Qt6::Quick
     )
     project_apply_cpp_options(world_map_presentation)
