@@ -20,6 +20,8 @@ function(project_add_targets)
             "${PROJECT_SOURCE_DIR}/client/src/presentation/qml/tooltip_helper.h"
             "${PROJECT_SOURCE_DIR}/client/src/presentation/qml/sound_helper.cpp"
             "${PROJECT_SOURCE_DIR}/client/src/presentation/qml/sound_helper.h"
+            "${PROJECT_SOURCE_DIR}/client/src/presentation/qml/game_window_controller.cpp"
+            "${PROJECT_SOURCE_DIR}/client/src/presentation/qml/game_window_controller.h"
     )
     target_include_directories(
         qml_enum_values
@@ -300,4 +302,9 @@ function(project_add_targets)
             Qt6::Core
     )
     project_apply_cpp_options(diagnostics)
+
+    target_link_libraries(
+        qml_enum_values
+        PRIVATE logging authentication_application world_session_application world_map_presentation
+    )
 endfunction()

@@ -1,18 +1,22 @@
 #include <QGuiApplication>
 #include <QIcon>
+#include <QFileInfo>
 #include <QQmlApplicationEngine>
 #include <QQmlComponent>
 #include <QQmlContext>
 #include <QQmlError>
 #include <QQuickItem>
 #include <QQuickWindow>
+#include <QSettings>
 #include <QString>
+#include <QVariant>
 #include <QUrl>
 
 #include <cstdlib>
 #include <filesystem>
 
 #include "infrastructure/logging/logger.h"
+#include "presentation/qml/game_window_controller.h"
 #include "presentation/qml/qml_enum_values.h"
 #include "presentation/qml/sound_helper.h"
 #include "presentation/qml/tooltip_helper.h"
@@ -21,6 +25,36 @@
 #include "presentation/rendering/optimized_border_image_provider.h"
 #include "presentation/rendering/world_map_qml_types.h"
 #include "presentation/translations/json_catalog_translator.h"
+
+namespace {
+
+	QString clientConfigPath() {
+		const QString configuredPath = QString::fromLocal8Bit(qgetenv("CLIENT_CONFIG_FILE"));
+		return configuredPath.isEmpty()
+			? QCoreApplication::applicationDirPath() + QStringLiteral("/client.ini")
+			: QFileInfo(configuredPath).absoluteFilePath();
+	}
+
+	QString assetsDirectory() {
+		const QString configuredDirectory = QString::fromLocal8Bit(qgetenv("CLIENT_ASSETS_DIRECTORY"));
+		if (!configuredDirectory.isEmpty()) {
+			const QFileInfo configuredInfo(configuredDirectory);
+			return configuredInfo.isAbsolute()
+				? configuredInfo.absoluteFilePath()
+				: QFileInfo(QCoreApplication::applicationDirPath() + QStringLiteral("/") + configuredDirectory).absoluteFilePath();
+		}
+		QSettings settings(clientConfigPath(), QSettings::IniFormat);
+		const QString settingsDirectory = settings.value(QStringLiteral("assets/directory")).toString();
+		if (settingsDirectory.isEmpty()) {
+			return QCoreApplication::applicationDirPath() + QStringLiteral("/things/assets");
+		}
+		const QFileInfo directoryInfo(settingsDirectory);
+		return directoryInfo.isAbsolute()
+			? directoryInfo.absoluteFilePath()
+			: QFileInfo(QCoreApplication::applicationDirPath() + QStringLiteral("/") + settingsDirectory).absoluteFilePath();
+	}
+
+}
 
 int main(int argc, char* argv[]) {
 	QGuiApplication application(argc, argv);
@@ -53,10 +87,11 @@ int main(int argc, char* argv[]) {
 		QStringLiteral("tibiaMouseCursorController"),
 		static_cast<QObject *>(nullptr)
 	);
-	const QString assetsDirectory = QString::fromLocal8Bit(qgetenv("CLIENT_ASSETS_DIRECTORY"));
+	const QString assetsPath = assetsDirectory();
+	auto *appearanceProvider = new client::presentation::rendering::AppearanceImageProvider(assetsPath);
 	engine.addImageProvider(
 		QStringLiteral("appearance"),
-		new client::presentation::rendering::AppearanceImageProvider(assetsDirectory)
+		appearanceProvider
 	);
 	engine.addImageProvider(
 		QStringLiteral("optimized1pixelborderimage"),
@@ -118,6 +153,13 @@ int main(int argc, char* argv[]) {
 		} else {
 			gameWindow->setParent(placeholder);
 			gameWindow->setParentItem(placeholder);
+			auto *controller = new client::presentation::qml::GameWindowController(
+				&engine, appearanceProvider, logger, &engine);
+			gameWindow->setProperty(
+				"controller",
+				QVariant::fromValue(static_cast<QObject *>(controller))
+			);
+			controller->setGameWindowRoot(gameWindow);
 			logger.info("main", "The original game window was added to the client window");
 		}
 	}

@@ -31,7 +31,26 @@ namespace client::presentation::qml {
 		return static_cast<int>(MapAntialiasingMode::Retro);
 	}
 
+	int TibiaEnumsAdapter::dailyRewardStateCollected() const {
+		return 0;
+	}
+
+	int TibiaEnumsAdapter::dailyRewardStateNotCollected() const {
+		return 1;
+	}
+
+	int TibiaEnumsAdapter::dailyRewardStateNotAvailable() const {
+		return 2;
+	}
+
 	void registerQmlEnumValues() {
+		qmlRegisterUncreatableType<SelectionModeAdapter>(
+			"QtQuick.LegacyControls",
+			1,
+			0,
+			"SelectionMode",
+			QStringLiteral("SelectionMode only provides selection mode constants")
+		);
 		qmlRegisterSingletonType<TibiaEnumsAdapter>(
 			"qmlenumvalues",
 			1,

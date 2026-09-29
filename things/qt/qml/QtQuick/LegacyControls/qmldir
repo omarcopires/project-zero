@@ -8,6 +8,7 @@ import QtQuick
 import QtQuick.Layouts
 import QtQuick.Window
 prefer :/qt/qml/QtQuick/LegacyControls/
+AbstractStyle 1.0 AbstractStyle.qml
 BasicTableView 1.0 BasicTableView.qml
 BasicTableViewStyle 1.0 BasicTableViewStyle.qml
 CalendarHeaderModel 1.0 CalendarHeaderModel.qml
@@ -15,6 +16,7 @@ CalendarOld 1.0 CalendarOld.qml
 CalendarStyle 1.0 CalendarStyle.qml
 FocusFrame 1.0 FocusFrame.qml
 FocusFrameStyle 1.0 FocusFrameStyle.qml
+LegacyPadding 1.0 LegacyPadding.qml
 ScrollBarOld 1.0 ScrollBarOld.qml
 ScrollViewHelper 1.0 ScrollViewHelper.qml
 ScrollViewOld 1.0 ScrollViewOld.qml
@@ -25,6 +27,8 @@ TableViewItemDelegateLoader 1.0 TableViewItemDelegateLoader.qml
 TableViewOld 1.0 TableViewOld.qml
 TableViewSelection 1.0 TableViewSelection.qml
 TableViewStyle 1.0 TableViewStyle.qml
+RangeModel 1.0 RangeModel.qml
+WheelArea 1.0 WheelArea.qml
 singleton TextSingleton 1.0 TextSingleton.qml
 depends QtQuick
 
