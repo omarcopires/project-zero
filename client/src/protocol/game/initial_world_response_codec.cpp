@@ -105,6 +105,37 @@ namespace protocol::game {
 				.bytesConsumed = 1 + dataSize,
 			};
 		}
+		if (opcode == GameServerOpcode::PlayerStats) {
+			// ProtocolGame::AddPlayerStats for the current 15.25 profile writes 60 data bytes.
+			constexpr std::size_t packetSize = 1 + 60;
+			if (payload.size() < packetSize) {
+				return { .status = InitialWorldResponseStatus::Truncated, .kind = InitialWorldResponseKind::Auxiliary };
+			}
+			return {
+				.status = InitialWorldResponseStatus::Ready,
+				.kind = InitialWorldResponseKind::Auxiliary,
+				.bytesConsumed = packetSize,
+			};
+		}
+		if (opcode == GameServerOpcode::ResourceBalance) {
+			if (payload.size() < 2) {
+				return { .status = InitialWorldResponseStatus::Truncated, .kind = InitialWorldResponseKind::Auxiliary };
+			}
+			const auto resourceType = std::to_integer<std::uint8_t>(payload[1]);
+			// The 15.25 server writes these resource types as uint32; all others as uint64.
+			const bool usesU32 = resourceType == 0x1E || resourceType == 0x1F
+			    || resourceType == 0x20 || resourceType == 0x21 || resourceType == 0x3C
+			    || resourceType == 0x50 || resourceType == 0x56 || resourceType == 0x57;
+			const std::size_t packetSize = 2 + (usesU32 ? sizeof(std::uint32_t) : sizeof(std::uint64_t));
+			if (payload.size() < packetSize) {
+				return { .status = InitialWorldResponseStatus::Truncated, .kind = InitialWorldResponseKind::Auxiliary };
+			}
+			return {
+				.status = InitialWorldResponseStatus::Ready,
+				.kind = InitialWorldResponseKind::Auxiliary,
+				.bytesConsumed = packetSize,
+			};
+		}
 		if (opcode == GameServerOpcode::ExivaRestrictions) {
 			std::size_t offset = 1;
 			if (payload.size() - offset < 6) {

@@ -10,6 +10,7 @@
 #include "protocol/handshake/world_login_packet_codec.h"
 
 #include <cstddef>
+#include <optional>
 #include <span>
 #include <utility>
 
@@ -23,6 +24,26 @@ namespace application::world {
 				reinterpret_cast<const char*>(bytes.data()),
 				static_cast<qsizetype>(bytes.size()),
 			};
+		}
+
+		std::optional<std::size_t> findLoginSuccessOffset(const std::span<const std::byte> bytes) {
+			for (std::size_t offset = 0; offset < bytes.size(); ++offset) {
+				if (std::to_integer<std::uint8_t>(bytes[offset]) != 0x17) {
+					continue;
+				}
+				const auto response = protocol::game::decodeInitialWorldResponse(bytes.subspan(offset));
+				if (response.status != protocol::game::InitialWorldResponseStatus::Ready
+				    || response.kind != protocol::game::InitialWorldResponseKind::LoginSuccess
+				    || response.playerId == 0 || response.serverBeat != 50) {
+					continue;
+				}
+				const auto nextOffset = offset + response.bytesConsumed;
+				if (nextOffset == bytes.size()
+				    || std::to_integer<std::uint8_t>(bytes[nextOffset]) == 0x1A) {
+					return offset;
+				}
+			}
+			return std::nullopt;
 		}
 
 	}
@@ -165,7 +186,9 @@ namespace application::world {
 		}
 		const auto decoded = protocol::framing::decodeModernSessionBody(body, m_request.xteaKey, m_expectedIncomingSequence);
 		if (decoded.status != protocol::framing::ModernSessionStatus::Ready) {
-			fail(WorldSessionError::InvalidSessionPacket, QStringLiteral("Encrypted world session packet is invalid"));
+			fail(WorldSessionError::InvalidSessionPacket,
+				QStringLiteral("Encrypted world session packet is invalid (codec status %1)")
+					.arg(static_cast<int>(decoded.status)));
 			return false;
 		}
 
@@ -199,7 +222,25 @@ namespace application::world {
 			return true;
 		}
 
+		if (decoded.bytes.empty()) {
+			fail(WorldSessionError::InvalidSessionPacket, QStringLiteral("Initial world response is empty"));
+			return false;
+		}
 		std::size_t offset = 0;
+		if (m_state == WorldSessionState::AwaitingSessionPacket) {
+			const auto firstOpcode = std::to_integer<std::uint8_t>(decoded.bytes.front());
+			const bool directLoginResponse = firstOpcode == 0x11 || firstOpcode == 0x14
+			    || firstOpcode == 0x15 || firstOpcode == 0x16 || firstOpcode == 0x18;
+			if (!directLoginResponse) {
+				const auto loginOffset = findLoginSuccessOffset(decoded.bytes);
+				if (!loginOffset) {
+					// Canary can send resource, stat, container and other world updates before login success.
+					emit sessionPayloadReceived(payload);
+					return true;
+				}
+				offset = *loginOffset;
+			}
+		}
 		while (offset < decoded.bytes.size()) {
 			const auto event = protocol::game::decodeInitialWorldResponse(
 				std::span<const std::byte>(decoded.bytes).subspan(offset));
@@ -208,7 +249,11 @@ namespace application::world {
 				    && event.status == protocol::game::InitialWorldResponseStatus::UnsupportedOpcode) {
 					break;
 				}
-				fail(WorldSessionError::InvalidSessionPacket, QStringLiteral("Initial world response is invalid or unsupported"));
+				fail(WorldSessionError::InvalidSessionPacket,
+					QStringLiteral("Initial world response is invalid or unsupported (status %1, opcode 0x%2, offset %3)")
+						.arg(static_cast<int>(event.status))
+						.arg(static_cast<qulonglong>(std::to_integer<std::uint8_t>(decoded.bytes[offset])), 2, 16, QChar('0'))
+						.arg(static_cast<qulonglong>(offset)));
 				return false;
 			}
 
@@ -269,7 +314,7 @@ namespace application::world {
 
 		const auto header = protocol::game::decodeMapDescriptionHeader(payload);
 		if (!header) {
-			fail(WorldSessionError::InvalidSessionPacket, QStringLiteral("Initial map description header is invalid"));
+			fail(WorldSessionError::InvalidMapDescription, QStringLiteral("Initial map description header is invalid"));
 			return false;
 		}
 		if (m_appearanceCatalog) {
@@ -279,7 +324,10 @@ namespace application::world {
 					return m_appearanceCatalog->find(kind, id);
 				});
 			if (decoded.status != protocol::game::MapDescriptionDecodeStatus::Ready) {
-				fail(WorldSessionError::InvalidSessionPacket, QStringLiteral("Initial map tile data is invalid or unsupported"));
+				fail(WorldSessionError::InvalidMapDescription,
+					QStringLiteral("Initial map tile data is invalid or unsupported (status %1, decoded tiles %2)")
+						.arg(static_cast<int>(decoded.status))
+						.arg(static_cast<qulonglong>(decoded.description.tiles.size())));
 				return false;
 			}
 			emit initialMapDescriptionReceived(decoded.description);
@@ -311,8 +359,7 @@ namespace application::world {
 		return !request.connection.host.trimmed().isEmpty()
 		    && request.connection.port != 0
 		    && !request.sessionKey.empty()
-		    && !request.characterName.empty()
-		    && !request.assetHashIdentifier.empty();
+		    && !request.characterName.empty();
 	}
 
 }

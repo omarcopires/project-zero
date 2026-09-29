@@ -60,10 +60,15 @@ namespace protocol::handshake {
 			EXPECT_EQ(encodeWorldLoginPacket(request).bytes, encodeWorldLoginPacket(request).bytes);
 		}
 
-		TEST(WorldLoginPacketCodec, RejectsEmptyMetadata) {
+		TEST(WorldLoginPacketCodec, EncodesEmptyAssetHashIdentifier) {
 			auto request = validRequest();
 			request.assetHashIdentifier.clear();
-			EXPECT_EQ(encodeWorldLoginPacket(request).status, WorldLoginPacketStatus::EmptyAssetHashIdentifier);
+			const auto result = encodeWorldLoginPacket(request);
+			ASSERT_EQ(result.status, WorldLoginPacketStatus::Ready);
+			const auto decoded = framing::decodeModernFrame(result.bytes);
+			ASSERT_EQ(decoded.status, framing::FrameDecodeStatus::FrameReady);
+			EXPECT_EQ(binary::readU16(decoded.body, 20).value(), 0);
+			EXPECT_EQ(decoded.body[22], std::byte { constants::gamePreviewStateDisabled });
 		}
 
 		TEST(WorldLoginPacketCodec, RejectsMetadataBeyondWireLength) {

@@ -95,12 +95,50 @@ namespace protocol::game {
 			EXPECT_EQ(result.sessionEndReason, 1);
 		}
 
+		TEST(InitialWorldResponseCodec, SkipsResourceBalancesWithoutConsumingNextOpcode) {
+			const std::vector<std::byte> bank {
+				std::byte { 0xEE }, std::byte { 0x00 },
+				std::byte { 1 }, std::byte { 2 }, std::byte { 3 }, std::byte { 4 },
+				std::byte { 5 }, std::byte { 6 }, std::byte { 7 }, std::byte { 8 },
+				std::byte { 0x0F },
+			};
+			const auto bankResult = decodeInitialWorldResponse(bank);
+			EXPECT_EQ(bankResult.status, InitialWorldResponseStatus::Ready);
+			EXPECT_EQ(bankResult.kind, InitialWorldResponseKind::Auxiliary);
+			EXPECT_EQ(bankResult.bytesConsumed, 10U);
+			EXPECT_EQ(decodeInitialWorldResponse(std::span<const std::byte>(bank).subspan(bankResult.bytesConsumed)).kind,
+			          InitialWorldResponseKind::EnterWorld);
+
+			const std::vector<std::byte> charm {
+				std::byte { 0xEE }, std::byte { 0x1E },
+				std::byte { 1 }, std::byte { 2 }, std::byte { 3 }, std::byte { 4 },
+				std::byte { 0x0F },
+			};
+			EXPECT_EQ(decodeInitialWorldResponse(charm).bytesConsumed, 6U);
+		}
+
+		TEST(InitialWorldResponseCodec, SkipsCurrentPlayerStatsWithoutConsumingNextOpcode) {
+			std::vector<std::byte> payload(61, std::byte { 0 });
+			payload[0] = std::byte { 0xA0 };
+			payload.push_back(std::byte { 0x0F });
+			const auto result = decodeInitialWorldResponse(payload);
+			EXPECT_EQ(result.status, InitialWorldResponseStatus::Ready);
+			EXPECT_EQ(result.kind, InitialWorldResponseKind::Auxiliary);
+			EXPECT_EQ(result.bytesConsumed, 61U);
+			EXPECT_EQ(decodeInitialWorldResponse(std::span<const std::byte>(payload).subspan(result.bytesConsumed)).kind,
+			          InitialWorldResponseKind::EnterWorld);
+			payload.resize(60);
+			EXPECT_EQ(decodeInitialWorldResponse(payload).status, InitialWorldResponseStatus::Truncated);
+		}
+
 		TEST(InitialWorldResponseCodec, RejectsTruncatedPayloads) {
 			const std::vector<std::byte> message { std::byte { 0x14 }, std::byte { 5 }, std::byte { 0 }, std::byte { 'x' } };
 			const std::vector<std::byte> success { std::byte { 0x17 } };
 
 			EXPECT_EQ(decodeInitialWorldResponse(message).status, InitialWorldResponseStatus::Truncated);
 			EXPECT_EQ(decodeInitialWorldResponse(success).status, InitialWorldResponseStatus::Truncated);
+			const std::vector<std::byte> resourceTypeOnly { std::byte { 0xEE }, std::byte { 0x00 } };
+			EXPECT_EQ(decodeInitialWorldResponse(resourceTypeOnly).status, InitialWorldResponseStatus::Truncated);
 		}
 
 		TEST(InitialWorldResponseCodec, RejectsEmptyAndUnsupportedPayloads) {

@@ -16,10 +16,6 @@
 namespace protocol::handshake {
 
 	WorldLoginPacketResult encodeWorldLoginPacket(const WorldLoginPacketRequest &request) {
-		if (request.assetHashIdentifier.empty()) {
-			return { .status = WorldLoginPacketStatus::EmptyAssetHashIdentifier };
-		}
-
 		const auto loginBlock = encodeWorldLoginBlock(request.loginBlock);
 		if (loginBlock.status != WorldLoginBlockStatus::Ready) {
 			return { .status = WorldLoginPacketStatus::InvalidLoginBlock };

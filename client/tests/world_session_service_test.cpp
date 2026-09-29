@@ -31,6 +31,7 @@ class WorldSessionServiceTest final : public QObject {
 
 private slots:
 	void completesHandshakeAndPublishesFirstPayload();
+	void ignoresPreLoginWorldUpdatesUntilLoginSuccess();
 	void buffersFragmentedChallenge();
 	void rejectsMalformedChallenge();
 	void rejectsConcurrentStart();
@@ -168,6 +169,51 @@ void WorldSessionServiceTest::completesHandshakeAndPublishesFirstPayload() {
 	QCOMPARE(decodedMap.center.floor, 7);
 	QCOMPARE(decodedMap.tiles.size(), static_cast<std::size_t>(18 * 14 * 8));
 	QCOMPARE(decodedMap.bytesConsumed, mapDescription.size());
+	QCOMPARE(failureSpy.count(), 0);
+}
+
+void WorldSessionServiceTest::ignoresPreLoginWorldUpdatesUntilLoginSuccess() {
+	QTcpServer server;
+	QVERIFY(server.listen(QHostAddress::LocalHost));
+	WorldSessionService service;
+	QSignalSpy acceptedSpy(&service, &WorldSessionService::loginAccepted);
+	QSignalSpy failureSpy(&service, &WorldSessionService::failureOccurred);
+	QSignalSpy payloadSpy(&service, &WorldSessionService::sessionPayloadReceived);
+	QVERIFY(service.start(requestFor(server)));
+	QTRY_VERIFY(server.hasPendingConnections());
+	auto* peer = server.nextPendingConnection();
+	const auto challenge = challengeFrame();
+	QCOMPARE(peer->write(challenge), static_cast<qint64>(challenge.size()));
+	QVERIFY(peer->waitForBytesWritten());
+	QTRY_COMPARE(service.state(), WorldSessionState::AwaitingSessionPacket);
+	QTRY_VERIFY(peer->bytesAvailable() > 0);
+	peer->readAll();
+
+	// Container updates can arrive in complete encrypted frames before the login response.
+	const std::vector<std::byte> containerUpdate { std::byte { 0x6E }, std::byte { 0x17 }, std::byte { 0x00 } };
+	const auto first = protocol::framing::encodeModernSessionPacket(containerUpdate, sessionKey, 1);
+	QCOMPARE(first.status, protocol::framing::ModernSessionStatus::Ready);
+	const auto firstBytes = toByteArray(first.bytes);
+	QCOMPARE(peer->write(firstBytes), static_cast<qint64>(firstBytes.size()));
+	QVERIFY(peer->waitForBytesWritten());
+	QTRY_COMPARE(payloadSpy.count(), 1);
+	QTRY_COMPARE(service.state(), WorldSessionState::AwaitingSessionPacket);
+	QCOMPARE(failureSpy.count(), 0);
+	QCOMPARE(acceptedSpy.count(), 0);
+
+	// A server flush can also mix auxiliary updates and the complete login response.
+	std::vector<std::byte> mixed { std::byte { 0x61 }, std::byte { 0x17 }, std::byte { 0x00 } };
+	const auto success = loginSuccessPayload();
+	mixed.insert(mixed.end(), success.begin(), success.end());
+	mixed.push_back(std::byte { 0x1A });
+	mixed.push_back(std::byte { 0x00 });
+	const auto second = protocol::framing::encodeModernSessionPacket(mixed, sessionKey, 2);
+	QCOMPARE(second.status, protocol::framing::ModernSessionStatus::Ready);
+	const auto secondBytes = toByteArray(second.bytes);
+	QCOMPARE(peer->write(secondBytes), static_cast<qint64>(secondBytes.size()));
+	QVERIFY(peer->waitForBytesWritten());
+	QTRY_COMPARE(acceptedSpy.count(), 1);
+	QCOMPARE(service.state(), WorldSessionState::LoginAccepted);
 	QCOMPARE(failureSpy.count(), 0);
 }
 
