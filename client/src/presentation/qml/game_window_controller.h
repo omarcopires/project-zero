@@ -3,6 +3,7 @@
 #include "application/authentication/authentication_service.h"
 #include "application/world/world_session_service.h"
 #include "infrastructure/logging/logger.h"
+#include "presentation/qml/split_resize_preference.h"
 #include "session/selection/character_selector.h"
 
 #include <QObject>
@@ -207,7 +208,7 @@ namespace client::presentation::qml {
 		QVariantList m_characterList;
 		int m_upperPaneHeight = 0;
 		int m_lowerPaneHeight = 0;
-		int m_resizingMode = 0;
+		int m_resizingMode = static_cast<int>(SplitResizePreference::PreferMapWindow);
 		quint16 m_worldPortOverride = 0;
 		bool m_isAuthenticated = false;
 		bool m_rememberEmail = false;

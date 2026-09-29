@@ -155,11 +155,11 @@ int main(int argc, char* argv[]) {
 			gameWindow->setParentItem(placeholder);
 			auto *controller = new client::presentation::qml::GameWindowController(
 				&engine, appearanceProvider, logger, &engine);
+			controller->setGameWindowRoot(gameWindow);
 			gameWindow->setProperty(
 				"controller",
 				QVariant::fromValue(static_cast<QObject *>(controller))
 			);
-			controller->setGameWindowRoot(gameWindow);
 			logger.info("main", "The original game window was added to the client window");
 		}
 	}

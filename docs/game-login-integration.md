@@ -48,6 +48,9 @@ como pendente em `phase0-assets-verification.md`.
 - A sessão do mundo só mostra o mapa após receber e decodificar sua descrição
   inicial. Camadas, andares vizinhos, animações, iluminação, movimento,
   HUD, chat e comandos continuam fora desta integração.
+- O layout reserva inicialmente espaço para o mapa e para o chat. As barras
+  laterais continuam vazias: inventário, containers e demais painéis exigem
+  controllers, modelos e dados de sessão que ainda não estão conectados.
 - O lembrete de e-mail persiste somente o endereço quando ativado; a senha
   nunca é gravada.
 

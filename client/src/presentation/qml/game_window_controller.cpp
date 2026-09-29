@@ -14,6 +14,7 @@
 #include <QQmlComponent>
 #include <QQuickImageProvider>
 #include <QQuickItem>
+#include <QQuickWindow>
 #include <QRandomGenerator>
 #include <QSettings>
 #include <QUrl>
@@ -286,6 +287,16 @@ namespace client::presentation::qml {
 		if (root == nullptr) {
 			return;
 		}
+		if (m_upperPaneHeight <= 0 || m_lowerPaneHeight <= 0) {
+			const auto *window = root->window();
+			const int measuredHeight = root->height() > 0
+				? qRound(root->height())
+				: window != nullptr ? window->height() : 0;
+			const int availableHeight = measuredHeight > 0 ? measuredHeight : 720;
+			const int lowerPaneHeight = std::clamp(availableHeight / 4, 160, 300);
+			m_lowerPaneHeight = lowerPaneHeight;
+			m_upperPaneHeight = std::max(1, availableHeight - lowerPaneHeight);
+		}
 		if (auto* mapPane = root->findChild<QObject*>(QStringLiteral("mapWindowPane")); mapPane != nullptr) {
 			mapPane->setProperty("mapWindowController", QVariant::fromValue(static_cast<QObject*>(this)));
 		}
@@ -314,14 +325,14 @@ namespace client::presentation::qml {
 	}
 
 	void GameWindowController::setUpperPaneHeight(const int height) {
-		if (m_upperPaneHeight != height) {
+		if (height > 0 && m_upperPaneHeight != height) {
 			m_upperPaneHeight = height;
 			emit propertiesChanged();
 		}
 	}
 
 	void GameWindowController::setLowerPaneHeight(const int height) {
-		if (m_lowerPaneHeight != height) {
+		if (height > 0 && m_lowerPaneHeight != height) {
 			m_lowerPaneHeight = height;
 			emit propertiesChanged();
 		}
