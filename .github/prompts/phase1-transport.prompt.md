@@ -1,40 +1,11 @@
 ---
-description: "Use para implementar a camada de transporte TCP assíncrona do novo motor (Fase 1): conexão, buffers incrementais, timeouts, cancelamento e fechamento limpo. Sem build nem execução."
+description: "Historical phase 1 asynchronous TCP transport task; no build or execution."
 agent: "agent"
-argument-hint: "Opcional: recorte (conexão, buffers, timeouts, fechamento)"
+argument-hint: "Optional focus: connection, buffers, timeouts, or shutdown"
 ---
 
-# Fase 1 — Transporte TCP assíncrono
+# Phase 1 — asynchronous TCP transport (historical prompt)
 
-Implementar a camada de transporte conforme [plano da Fase 1](../../docs/phase1-bootstrap-transport.md), seção "Arquitetura da camada" e tarefa 1.3. Código novo em `client/src/network/` (ou `client/src/transport/`, conforme o bootstrap existente).
+Inspect the existing transport first, then implement any remaining scope from the [phase 1 plan](../../docs/phase1-bootstrap-transport.md). Provide asynchronous connection, incremental read buffers, configurable connection/read timeouts, cooperative cancellation, clean close notifications, and typed network/timeout/remote-close/cancellation errors. Preserve boundaries across partial reads. Define ownership and lifetime clearly and respect QObject thread affinity; transport must not touch QML objects directly.
 
-## Requisitos
-
-- Conexão TCP assíncrona; nenhuma operação bloqueante no fluxo principal.
-- Buffers de leitura incremental; preservar fronteiras entre leituras parciais.
-- Timeouts de conexão e de leitura configuráveis.
-- Cancelamento cooperativo; fechamento limpo com notificação de desconexão.
-- Ownership e ciclo de vida explícitos: sem referências pendentes após fechamento; sem proprietários concorrentes (smart pointer + parent QObject) sem justificativa documentada.
-- Respeitar afinidade de threads Qt: transporte não toca objetos de UI; eventos entregues via sinais/filas apropriadas.
-- Erros tipados e contextualizados (rede, timeout, fechamento remoto, cancelamento); nunca converter falha em sucesso silencioso.
-
-## Contratos
-
-- Transporte implementa portas internas usadas pelos casos de uso/diagnóstico; enquadramento puro não depende do socket. A composição integra ambos conforme Clean Architecture.
-- Não interpretar conteúdo das mensagens nesta camada (protocolo é fase posterior).
-- Logging via adaptador spdlog da infraestrutura, injetado pela composição; sem tipos concretos no núcleo ou logger global. Proibido registrar credenciais/tokens; sem `printf`/`std::cout` dispersos.
-- Usar nomes descritivos sem marca/prefixo de repositório e cada `enum class` em header próprio do módulo, conforme os [padrões](../../docs/coding-standards.md).
-
-## Restrições obrigatórias
-
-- Código novo em inglês, seguindo `.clang-format` e [padrões C++](../instructions/cpp.instructions.md).
-- Não alterar `data/`, `images/`, `qt/`, `qt-project.org/`, `qtwebchannel/`, `spells/`, `message.txt`.
-- Não executar build, CTest, testes compilados, cliente ou servidor. Escrever testes é permitido; executá-los, não.
-- Não commitar sem solicitação explícita ([política de commits](../instructions/commits.instructions.md)).
-
-## Relatório esperado
-
-- Arquivos criados/alterados e responsabilidades.
-- Decisões de ownership, threads e cancelamento.
-- Testes escritos (não executados) e cenários cobertos.
-- Pendências de build/validação para o responsável/CI.
+Transport implements internal ports; pure framing does not depend on sockets. Do not interpret game messages here. Compose injected infrastructure logging without concrete logger types in the core or sensitive packet logging. Use responsibility-based names and separate enum headers. Follow [C++ rules](../instructions/cpp.instructions.md), preserve original frontend resources, and write but do not execute tests. Report files, lifecycle decisions, written coverage, and pending build/validation. Do not commit without authorization.

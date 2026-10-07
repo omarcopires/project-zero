@@ -1,36 +1,11 @@
 ---
-description: "Use para escrever testes da Fase 1 (unitários do núcleo e integração Qt do transporte): GoogleTest/Qt Test como proposta, registro no CTest. Escrever é permitido; executar, proibido."
+description: "Historical phase 1 test-writing task; writing tests is allowed, running builds and tests is prohibited."
 agent: "agent"
-argument-hint: "Opcional: componente alvo (framing, transport, core)"
+argument-hint: "Optional component: framing, transport, or core"
 ---
 
-# Fase 1 — Testes automatizados
+# Phase 1 — automated tests (historical prompt)
 
-Escrever os testes da Fase 1 conforme [plano](../../docs/phase1-bootstrap-transport.md) e [política de validação](../../docs/validation-policy.md). **Escrever testes é permitido; executá-los, nunca** — build, CTest e testes compilados são do responsável/CI.
+Inspect existing suites, then write tests under `client/tests/` according to the [phase 1 plan](../../docs/phase1-bootstrap-transport.md) and [validation policy](../../docs/validation-policy.md). Cover pure framing with valid, partial, concatenated, truncated, invalid, and boundary inputs; cover Qt transport connection/disconnection/error signals, lifetime, cancellation, and timeouts using local test sockets or mocks. Add a regression case for each fixed defect.
 
-## Escopo
-
-1. **Unitários (núcleo/enquadramento):** funções puras, determinísticas, sem rede. Matriz de enquadramento: válidas, parciais, concatenadas, truncadas, inválidas, limites.
-2. **Integração Qt (transporte):** sinais de conexão/desconexão/erro, ciclo de vida, cancelamento, timeouts — com sockets locais de teste ou mocks; sem servidor real.
-3. **Regressão:** toda correção preserva teste do caminho originalmente defeituoso.
-
-## Convenções
-
-- Framework: GoogleTest para núcleo (proposta da Fase 0) e Qt Test para objetos Qt; confirmar com o bootstrap existente antes de adicionar dependências ao `vcpkg.json`.
-- Nomes descrevem comportamento, não implementação: métodos Qt em lowerCamelCase (`partialReadProducesIncompleteFrame`); identificadores de suíte/caso GoogleTest em PascalCase (`PartialReadProducesIncompleteFrame`), sem nomes genéricos como `test1`.
-- Fixtures locais determinísticas; sem dependência de servidor real, banco ou rede externa.
-- Sem dados sensíveis em fixtures; sem dumps de procedência desconhecida.
-- Registrar cada suíte no CTest via o alvo de testes existente.
-
-## Restrições obrigatórias
-
-- Código novo em inglês, `.clang-format`, [padrões C++](../instructions/cpp.instructions.md).
-- Não alterar árvores protegidas do frontend original.
-- Não executar build, CTest, testes compilados, cliente ou servidor; não disparar pipelines.
-- Não commitar sem solicitação explícita ([política de commits](../instructions/commits.instructions.md)).
-
-## Relatório esperado
-
-- Suítes criadas e cenários cobertos por suíte.
-- Dependências adicionadas ao manifesto (se houver) e justificativa.
-- Declaração explícita: testes escritos, **não executados**; execução pendente para responsável/CI.
+Use GoogleTest for core and Qt Test for Qt objects where the current build supports them. Name tests by behavior and use deterministic synthetic fixtures without real servers, external networks, secrets, or unknown dumps. Register suites in CTest. Preserve the original frontend. Do not run CMake, CTest, compiled tests, client, server, or pipelines. Report suites and scenarios, dependency changes, and that tests were written but not executed. Do not commit without authorization.

@@ -1,45 +1,11 @@
 ---
-description: "Use para implementar o enquadramento de mensagens 15.25 (Fase 1): funções puras sobre buffers, limites de mensagem, erros tipados e matriz de testes. Sem build nem execução."
+description: "Historical phase 1 framing task: deterministic 15.25 buffer operations, typed errors, and tests; no build or execution."
 agent: "agent"
-argument-hint: "Opcional: aspecto específico (leitura, escrita, limites, erros)"
+argument-hint: "Optional focus: reading, writing, limits, or errors"
 ---
 
-# Fase 1 — Enquadramento 15.25
+# Phase 1 — 15.25 framing (historical prompt)
 
-Implementar o enquadramento de mensagens conforme [plano da Fase 1](../../docs/phase1-bootstrap-transport.md), tarefa 1.4. O contrato é o definido na Fase 0 (perfil Current 15.25 do servidor em `E:\caverot-server`); **não inferar o formato por suposição** — se um detalhe do contrato não estiver documentado, pare e registre a pendência.
+Implement the documented [15.25 framing contract](../../docs/phase1-framing-contract.md) only after inspecting the current implementation. Do not guess undocumented wire details or probe the server to discover them. Use pure buffer/span operations with incremental reads: incomplete frames wait for more input, oversized frames fail with typed errors, and invalid data returns useful context without sensitive contents. Preserve byte order, lengths, and limits on writes; avoid unnecessary allocations.
 
-## Requisitos
-
-- Funções puras sobre spans/buffers: determinísticas, sem estado global, testáveis sem rede.
-- Leitura incremental: frame incompleto → aguardar mais dados (não é erro); excesso de tamanho → falha tipada; dados inválidos → falha contextualizada.
-- Escrita de mensagens conforme contrato (ordem de bytes, tamanhos, limites).
-- Sem alocação desnecessária por mensagem; sem cópias evitáveis.
-- Erros tipados com contexto suficiente para diagnóstico, sem expor conteúdo sensível.
-
-## Testes a escrever (não executar)
-
-Cobrir a matriz completa em `client/tests/`:
-
-1. mensagem única válida;
-2. mensagem parcial (fragmentada em múltiplas leituras);
-3. mensagens concatenadas em uma única leitura;
-4. mensagem truncada no meio;
-5. mensagem inválida (tamanho/campos);
-6. limite exato de tamanho (aceito) e limite+1 (rejeitado).
-
-Cada caso com resultado esperado explícito (bytes consumidos, evento produzido, erro tipado).
-
-## Restrições obrigatórias
-
-- Código novo em inglês, `.clang-format`, [padrões C++](../instructions/cpp.instructions.md).
-- Não alterar árvores protegidas do frontend original.
-- Não executar build, CTest ou testes compilados; validação executável é do responsável/CI ([política de validação](../../docs/validation-policy.md)).
-- Não enviar mensagens reais ao servidor para "descobrir" o contrato.
-- Não commitar sem solicitação explícita.
-
-## Relatório esperado
-
-- Arquivos criados/alterados e API exposta.
-- Suposições de contrato pendentes de confirmação da Fase 0.
-- Matriz de testes escritos e cobertura pretendida.
-- Pendências de build/execução para o responsável/CI.
+Write, but do not run, deterministic tests for one valid frame, fragmented reads, concatenated frames, truncated input, invalid lengths/fields, and the exact size limit plus one. State bytes consumed, events, and errors in expectations. Follow [general](../copilot-instructions.md) and [C++](../instructions/cpp.instructions.md) rules. Report API, changed files, contract uncertainties, test coverage, and pending owner/CI validation. Do not commit without authorization.

@@ -1,35 +1,7 @@
-# Fase 1 — Registro de aceite
+# Phase 1 — acceptance record
 
-Data: 2026-09-22. Estado: **implementação e validação no ambiente do responsável concluídas, com ressalva de reprodutibilidade em máquina limpa**.
+**Historical owner validation, September 22, 2026.** The headless bootstrap, structured logging, TCP transport, outer 15.25 framing, diagnostics CLI, and asynchronous HTTP transport were implemented. The owner reported configure/build using `windows-x64`, `100% tests passed, 0 tests failed out of 43`, and a passive connection to the loopback world endpoint that closed cleanly without sending a payload.
 
-## Resultado
+These results accepted phase 1 in the owner's environment, with clean-machine reproducibility still pending. They did not prove authentication, inner protocol compatibility, world entry, or frontend loading. TCP framing tests covered complete, partial, concatenated, truncated, invalid, and boundary frames. HTTP tests used a local synthetic harness for response limits, deadline, cancellation, redirect rejection, concurrency, and loopback-only plain HTTP. HTTPS retained Qt's standard certificate validation. The protected original trees had no tracked changes in the phase diff.
 
-O bootstrap headless, logging estruturado, transporte TCP, envelope externo 15.25, diagnóstico e transporte HTTP assíncrono foram implementados. O responsável confirmou configuração e compilação pelo preset `windows-x64`, evolução da suíte até `100% tests passed, 0 tests failed out of 43` e conexão passiva ao mundo de laboratório com fechamento limpo e sem envio de payload.
-
-Essas evidências encerram a implementação prevista da Fase 1 no ambiente atual. Elas não comprovam autenticação, compatibilidade das mensagens internas do protocolo, entrada no mundo ou carregamento do frontend.
-
-## Critérios
-
-| Critério | Resultado | Evidência ou limite |
-|---|---|---|
-| Configuração e build | Aprovado no ambiente atual | Preset único `windows-x64`; compilação confirmada pelo responsável |
-| Testes automatizados | Aprovado | 43/43 após transporte HTTP |
-| Transporte TCP | Aprovado | Testes locais e conexão passiva a `localhost:7172` |
-| Envelope 15.25 | Aprovado no escopo externo | Casos unitários de frame completo, parcial, concatenado, truncado, inválido e limites |
-| Diagnóstico headless | Aprovado | Conexão e fechamento sem payload; fixtures offline cobertas |
-| Logging | Aprovado no escopo implementado | Formato, níveis, sanitização sintética e encerramento cobertos pela suíte |
-| Transporte HTTP | Aprovado em harness local | Limite, deadline, cancelamento, redirect, concorrência e restrição de HTTP a loopback |
-| Originais protegidos | Preservados no histórico da fase | Diff entre `6e96c1002f3ed80b8d3a95c8ab2e5e83269a1bc8` e o encerramento não contém caminhos protegidos |
-| Reprodutibilidade em máquina limpa | Pendente | Não foi apresentada execução em segundo ambiente limpo ou CI |
-
-## Limites mantidos
-
-- A conexão TCP passiva não enviou login e não valida o protocolo de jogo.
-- O transporte HTTP foi testado com respostas sintéticas; nenhuma credencial, sessão ou resposta real foi processada.
-- HTTPS usa a validação padrão do Qt; nenhum bypass de certificado foi introduzido.
-- O desafio de segundo fator continua fora do primeiro incremento de autenticação e deverá interromper o fluxo explicitamente quando recebido.
-- Nenhum arquivo das árvores originais protegidas foi modificado.
-
-## Transição
-
-A Fase 2 pode iniciar pelos estados e contratos internos de autenticação e sessão. A primeira integração deve consumir somente o endpoint local confirmado, correlacionar respostas à tentativa vigente, invalidar respostas tardias após cancelamento e rejeitar desafios não suportados sem convertê-los em sucesso.
+The next phase could implement authentication state and session contracts, correlating responses to active attempts, discarding late responses after cancellation, and stopping unsupported two-factor challenges explicitly. Current functionality has advanced beyond this historical phase; see the [README](../README.md).

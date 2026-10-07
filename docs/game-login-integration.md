@@ -1,58 +1,28 @@
-# Integração do login e entrada no mundo
+# Login and world-entry integration
 
-## Fluxo conectado
+## Connected flow
 
-`gamewindow.qml` agora recebe um controller Qt. O formulário original envia
-as credenciais ao `AuthenticationService`, que usa o endpoint de
-`network/login_service_url`. Uma resposta autenticada alimenta
-`CharacterSelector` e abre o `CharacterSelection.qml` original com os nomes
-de personagens e mundos recebidos. Credenciais recusadas, falhas de
-transporte e desafios de verificação não suportados permanecem estados
-distintos; o cliente não ignora 2FA nem registra senha ou chave de sessão.
+The original `gamewindow.qml` receives a Qt controller. Its login form sends credentials to `AuthenticationService` through `network/login_service_url`. A successful response populates `CharacterSelector` and opens the original `CharacterSelection.qml` with returned character and world names. Rejected credentials, transport failures, and unsupported verification challenges remain separate states. The client does not bypass two-factor authentication or log passwords and session keys.
 
-Ao confirmar exatamente um personagem, o controller resolve o endpoint,
-gera uma chave XTEA aleatória e inicia `WorldSessionService`. A tela só muda
-para `INGAME` depois que a sessão é aceita e uma descrição inicial de mapa
-é decodificada. Essa descrição é entregue ao `WorldMapItem` original; a
-renderização continua limitada a sprites estáticos de um único campo.
+After confirmation of exactly one character, the controller resolves the world endpoint, generates a random XTEA key, and starts `WorldSessionService`. The UI enters `INGAME` only after the world session is accepted and an initial map description is decoded. That description is passed to `WorldMapItem`; rendering is still limited to static sprites from one field.
 
-## Configuração local
+## Local configuration
 
-O cliente lê `client.ini` ao lado do executável. `CLIENT_CONFIG_FILE` pode
-apontar para outro arquivo. O exemplo versionado está em
-`client/config/local.example.ini`; copie-o como `client.ini` e configure:
+The client reads `client.ini` beside the executable. `CLIENT_CONFIG_FILE` can select another file. Copy `client/config/local.example.ini` and configure:
 
-- `network/login_service_url`: serviço HTTP de login do laboratório;
-- `network/world_host` e `network/world_port`: ambos preenchidos para
-  substituir o endereço recebido na resposta de login, ou ambos vazios para
-  usar esse endereço;
-- `network/asset_hash_identifier`: valor opcional do campo de identificação
-  de assets no login do mundo. O servidor 15.25 deste laboratório lê e
-  registra o campo sem validá-lo; o cliente envia uma string vazia quando
-  nenhuma identificação foi configurada;
-- `assets/directory`: diretório do catálogo e dos sprites. O padrão local é
-  `things/assets`; `CLIENT_ASSETS_DIRECTORY` tem precedência.
+- `network/login_service_url`: laboratory HTTP login service.
+- `network/world_host` and `network/world_port`: set both to override the world endpoint from login, or leave both empty to use the response.
+- `network/asset_hash_identifier`: optional world-login asset identifier. The laboratory 15.25 server reads and logs this field without validating it; the client sends an empty string when it is unset.
+- `assets/directory`: catalog and sprite directory, defaulting locally to `things/assets`. `CLIENT_ASSETS_DIRECTORY` takes precedence.
 
-O cliente não inventa um hash de assets. A entrada no mundo ainda depende
-de confirmar que os assets locais correspondem aos IDs usados pelo servidor;
-o inventário atual ainda registra essa validação
-como pendente em `phase0-assets-verification.md`.
+The client does not invent an asset hash. Matching local asset IDs to the server is still an external validation gate; see [asset verification](phase0-assets-verification.md).
 
-## Limites deste incremento
+## Known limits
 
-- Desafios 2FA são recusados com estado explícito; entrada de código e
-  reenvio não estão conectados.
-- O modelo de seleção expõe nome e mundo. Outfit, estado de premium,
-  personagens ocultos, pins, loja, calendário e indicadores ao vivo não são
-  fornecidos pela resposta de autenticação disponível.
-- A sessão do mundo só mostra o mapa após receber e decodificar sua descrição
-  inicial. Camadas, andares vizinhos, animações, iluminação, movimento,
-  HUD, chat e comandos continuam fora desta integração.
-- O layout reserva inicialmente espaço para o mapa e para o chat. As barras
-  laterais continuam vazias: inventário, containers e demais painéis exigem
-  controllers, modelos e dados de sessão que ainda não estão conectados.
-- O lembrete de e-mail persiste somente o endereço quando ativado; a senha
-  nunca é gravada.
+- Two-factor challenges have an explicit unsupported state; code entry and resend are not connected.
+- Selection exposes character and world names. Outfit, premium state, hidden status, pins, store, calendar, and live indicators are not supplied by the available authentication response.
+- The initial world map is shown after decoding; floors, layers, animation, lighting, movement, HUD, chat, and commands are outside this integration.
+- The layout reserves map and chat space; sidebars are empty until inventory, container, and other models/controllers are connected.
+- Remember-email persists only the address when enabled; it never saves the password.
 
-Esta etapa foi revisada estaticamente. Compilação, os 158 testes e o fluxo
-com servidor permanecem pendentes de validação externa para estas mudanças.
+The historical integration review was static. At that point compilation, 158 tests, and the server flow remained pending external validation for those changes. This statement is not a current test result.

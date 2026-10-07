@@ -1,76 +1,38 @@
 ---
-description: "Use ao preparar, revisar ou executar commits: Conventional Commits em inglês, título de até 72 caracteres por regra do projeto, corpo detalhado e autorização do responsável antes de commitar."
+description: "Use when preparing, reviewing, or making commits: English Conventional Commits, a project title limit of 72 characters, a detailed body, and owner authorization before committing."
 ---
 
-# Política de commits
+# Commit policy
 
-## Quando commitar
+## When to commit
 
-- Commits são criados **somente** após solicitação explícita do responsável ou confirmação de que a feature está concluída e aprovada.
-- Não commitar automaticamente ao concluir uma tarefa, mesmo que o resultado pareça completo.
-- Não commitar mudanças parciais, não verificadas ou com bloqueios conhecidos sem autorização explícita.
-- Não commitar sem o responsável revisar o diff quando ele solicitar revisão prévia.
-- Não usar commit para contornar proibições: build, testes compilados, execução do cliente/servidor e alteração do frontend original permanecem proibidos e nunca são "validados por commit".
-- Não fazer push, force-push, rebase público, tag ou publicação sem solicitação específica.
+- Commit **only** after an explicit owner request or confirmation that the feature is complete and approved. Do not commit automatically when a task appears finished.
+- Do not commit partial or unverified changes, or changes with known blockers, without explicit authorization. If the owner requests a diff review first, wait for that review.
+- A commit does not bypass prohibitions on builds, compiled tests, running the client/server, or changing the original frontend.
+- Do not push, force-push, rebase public history, tag, or publish without a specific request.
 
-## Formato: Conventional Commits em inglês
+## English Conventional Commits
 
-- Tipo obrigatório: `feat`, `fix`, `refactor`, `perf`, `test`, `docs`, `build`, `ci`, `chore`, `revert`.
-- Escopo opcional entre parênteses, em inglês, minúsculas: `feat(protocol):`, `fix(session):`.
-- Marcar breaking change com `!` após tipo/escopo e explicar no corpo.
-- Assunto e corpo estritamente em inglês. Assunto em modo imperativo, sem ponto final: `add session state machine`, não `added session state machine`.
+- Required type: `feat`, `fix`, `refactor`, `perf`, `test`, `docs`, `build`, `ci`, `chore`, or `revert`.
+- Optional lowercase English scope: `feat(protocol):`, `fix(session):`.
+- Mark breaking changes with `!` after the type/scope and explain them in the body.
+- Write subject and body in English. Use an imperative subject without a final period: `add session state machine`.
+- Project subject limit: **72 characters**, preferably **50**. This is a project rule, not a universal GitHub limit.
 
-## Título (primeira linha)
+## Body
 
-- Limite adotado pelo projeto: título **≤ 72 caracteres**, preferindo **≤ 50** para legibilidade. Não é um limite rígido universal do GitHub nem garantia de ausência de truncamento em todas as telas.
-- Formato: `<type>(<scope>): <subject>`.
-- Sem período final, sem capitalizar a primeira letra do assunto além do necessário.
-- Se o assunto não couber com clareza, o escopo está largo demais: dividir o commit.
-
-## Corpo (descrição detalhada)
-
-- Separar assunto e corpo por uma linha em branco.
-- Explicar **o que** mudou, **por que** e **quais limitações** permanecem; não narrar o diff linha a linha.
-- Linhas com no máximo **72 caracteres**.
-- Incluir quando aplicável:
-  - motivação e contexto (problema, requisito, fase do plano);
-  - decisão técnica relevante e alternativas descartadas, se não óbvias;
-  - impacto em contratos do frontend original (deve ser "nenhum" para alterações do motor);
-  - validações realmente realizadas e pendências (build/testes manuais pendentes);
-  - referências a documentos do plano, issues ou discussões.
-- Quebras de página/rodapés: usar convenção do Conventional Commits (`BREAKING CHANGE:`, `Refs:`, `Closes:`).
-- Não incluir segredos, tokens, credenciais, caminhos pessoais ou dados sensíveis no corpo.
-
-## Exemplos
-
-Bom:
+Separate the subject and body with a blank line. Explain what changed, why, and what limitations remain rather than narrating the diff. Wrap lines at 72 characters. Include relevant context, technical decisions, frontend impact, checks actually performed, pending builds/tests, and references. Use standard footers such as `BREAKING CHANGE:`, `Refs:`, or `Closes:` when appropriate. Never include credentials, tokens, sensitive data, or personal paths.
 
 ```text
 feat(protocol): add 15.25 message framing decoder
 
-Implement incremental decoder for the 15.25 wire contract:
-- preserve message boundaries across partial TCP reads
+Implement incremental decoding for the 15.25 wire contract:
+- preserve boundaries across partial TCP reads
 - reject oversized frames with explicit protocol errors
-- cover valid, truncated and concatenated inputs in unit tests
+- cover valid, truncated, and concatenated inputs in unit tests
 
 Build and integration tests remain pending for the owner/CI.
 Refs: docs/project-plan-2026-09-17.md (phase 1)
 ```
 
-Ruim:
-
-```text
-update stuff
-```
-
-```text
-fix: fixed the bug and also refactored everything, WIP, please review
-```
-
-## Checklist antes de commitar
-
-1. Solicitação explícita do responsável ou confirmação da feature aprovada.
-2. Diff revisado; nenhuma alteração nos originais protegidos (`data/`, `images/`, `qt/`, `qt-project.org/`, `qtwebchannel/`, `spells/`, `message.txt`).
-3. Nenhum arquivo gerado por build, artefato temporário ou segredo incluído.
-4. Título dentro do limite, corpo detalhado e em inglês.
-5. Limitações e validações pendentes declaradas no corpo, sem alegar build/testes executados.
+Before committing, confirm authorization, review the diff and protected paths, exclude generated files and secrets, and accurately state validation limits.

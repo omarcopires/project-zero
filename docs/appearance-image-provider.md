@@ -1,23 +1,7 @@
-# Provider de imagens de aparências
+# Appearance image provider
 
-O adaptador Qt Quick `AppearanceImageProvider` liga o catálogo Protobuf de
-aparências ao loader das folhas CIP. O identificador de imagem tem o formato
-`image://appearance/<tipo>/<id>`, com tipo `object`, `outfit`, `effect` ou
-`missile`.
+The Qt Quick `AppearanceImageProvider` connects the protobuf appearance catalog to the CIP sprite-sheet loader. URLs have the form `image://appearance/<type>/<id>`, where the type is `object`, `outfit`, `effect`, or `missile`.
 
-O processo recebe o caminho explícito do diretório de assets pela variável
-`CLIENT_ASSETS_DIRECTORY`. Esse diretório deve conter
-`catalog-content.json`, o arquivo de aparências e as folhas de sprites
-referenciadas pelo catálogo. Quando a variável estiver ausente ou o catálogo
-não puder ser carregado, as solicitações retornam imagem vazia.
+Set `CLIENT_ASSETS_DIRECTORY` to a directory containing `catalog-content.json`, the referenced appearance file, and CIP sprite sheets. Requests return an empty image if the variable is absent or the catalog cannot be loaded.
 
-Este incremento desenha somente uma aparência estática composta por uma camada,
-um padrão em cada dimensão e um único sprite, sem animação. Aparências animadas,
-multicamada ou com padrões adicionais ficam sem imagem até que composição e
-sincronização de frames sejam implementadas. O provider não modifica nem
-substitui QML original.
-
-O `clientwindow.qml` atualmente carregado não solicita imagens deste provider.
-Ele estabelece o adaptador e o caminho de consumo para integração posterior; a
-tela de jogo ainda depende dos tipos e controllers nativos `WorldMap`,
-`LightMap` e `mapWindowController`.
+The provider currently renders only a static appearance with one layer, one pattern in each dimension, and one sprite. Animated or multilayer appearances and additional patterns return no image until composition and frame synchronization exist. It does not modify or replace the original QML. The originally loaded `clientwindow.qml` does not request this provider directly; world presentation also depends on `WorldMap`, `LightMap`, and `mapWindowController`.

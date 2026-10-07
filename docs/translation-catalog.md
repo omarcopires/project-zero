@@ -1,23 +1,10 @@
-# Catálogo de traduções
+# Translation catalog
 
-O cliente consome `client/translations/en.json`, extraído do catálogo inglês
-compilado `client.en.qm` presente na instalação local do cliente original. O
-JSON guarda cada entrada por contexto, chave de origem/ID, comentário e todas as
-formas de tradução disponíveis. O bootstrap instala esse catálogo antes de
-carregar o QML.
+The client loads `client/translations/en.json`, extracted from the compiled English `client.en.qm` in a local installation of the original client. Each JSON entry retains context, source key/ID, comment, and available translation forms. Bootstrap installs the catalog before loading QML.
 
-## Origem e extração
+## Source and reproduction
 
-Origem verificada: `D:\Tibia Global\packages\Tibia\bin\client.en.qm`.
-
-- Idioma: `en`.
-- Tamanho: 739.296 bytes.
-- SHA-256: `ea8d9fc576f3cad4b2976f1fa8d52a599ad74c951252c814a6e50e99d0ab3808`.
-- Entradas extraídas: 4.622, todas com contexto vazio e uma forma de tradução.
-- IDs repetidos ou traduções vazias na extração: nenhum.
-
-Para repetir a extração a partir de outra instalação, mantendo o catálogo em
-formato estável:
+The source used for the recorded extraction was `D:\Tibia Global\packages\Tibia\bin\client.en.qm` (739,296 bytes; SHA-256 `ea8d9fc576f3cad4b2976f1fa8d52a599ad74c951252c814a6e50e99d0ab3808`). The extraction produced 4,622 entries, all with empty context and one translation form, with no duplicate IDs or empty translations.
 
 ```powershell
 python tools/extract_qm_catalog.py `
@@ -25,15 +12,4 @@ python tools/extract_qm_catalog.py `
   client/translations/en.json
 ```
 
-O script valida os blocos e registros do formato QM, preserva as formas plurais
-caso existam, ordena as entradas de maneira determinística e registra o hash da
-origem. O arquivo fonte original não é alterado.
-
-## Limites do QM compilado
-
-Esta é uma extração integral das entradas efetivamente publicadas nesse arquivo,
-não do projeto-fonte de traduções. Um QM não contém necessariamente mensagens
-inacabadas ou descartadas na compilação, nem todos os metadados de um arquivo
-`.ts` original. Também não foram encontrados catálogos de outros idiomas. Assim,
-as 4.622 entradas são o mapa completo disponível no `client.en.qm`, mas não
-provam cobertura de todas as strings existentes no cliente.
+The script validates QM blocks and records, preserves plural forms if present, sorts entries deterministically, and records the source hash. It does not change the QM file. A compiled QM may omit unfinished/discarded messages and `.ts` metadata. No other language catalogs were found in that historical inspection, so these entries do not prove coverage of every UI string.
